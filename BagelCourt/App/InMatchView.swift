@@ -27,7 +27,7 @@ struct InMatchView: View {
                     .padding(.bottom, 16)
                 scoreboardCard
                     .padding(.horizontal, BCLayout.horizontalMargin)
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 24)   // twice the gap between the point buttons: a separate group
                 if controller.isOver {
                     matchOverPanel
                         .transition((reduceMotion ? AnyTransition.opacity : .opacity.combined(with: .scale(scale: 0.96)))
@@ -182,10 +182,11 @@ struct InMatchView: View {
     // MARK: - Scoring area
 
     private var scoringArea: some View {
-        GeometryReader { geo in
-            VStack(spacing: 2) {
-                pointButton(for: .home, height: (geo.size.height - 2) / 2)
-                pointButton(for: .away, height: (geo.size.height - 2) / 2)
+        let gap: CGFloat = 12   // clear separation between the two tap targets
+        return GeometryReader { geo in
+            VStack(spacing: gap) {
+                pointButton(for: .home, height: (geo.size.height - gap) / 2)
+                pointButton(for: .away, height: (geo.size.height - gap) / 2)
             }
         }
         .padding(.horizontal, BCLayout.horizontalMargin)
