@@ -9,21 +9,26 @@ struct InMatchView: View {
     var onEnd: () -> Void
 
     @State private var showAbandonAlert = false
-    @State private var showGameBanner: Side? = nil  // flashes briefly after a game/set
+    @State private var celebrate = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
             Color.bcBg.ignoresSafeArea()
 
-            if controller.isOver {
-                matchOverView
-            } else {
-                VStack(spacing: 0) {
-                    topBar
-                    scoreboardCard
-                        .padding(.horizontal, BCLayout.horizontalMargin)
-                        .padding(.bottom, 12)
+            // The top bar and scoreboard stay put; only the area below changes when the match ends.
+            VStack(spacing: 0) {
+                topBar
+                scoreboardCard
+                    .padding(.horizontal, BCLayout.horizontalMargin)
+                    .padding(.bottom, 12)
+                if controller.isOver {
+                    matchOverPanel
+                        .transition((reduceMotion ? AnyTransition.opacity : .opacity.combined(with: .scale(scale: 0.96)))
+                            .animation(.bcSmooth))
+                } else {
                     scoringArea
+                        .transition(.opacity)
                 }
             }
         }
@@ -55,27 +60,19 @@ struct InMatchView: View {
                 Text(controller.format.displayLabel.uppercased())
                     .stepLabelStyle()
                 if controller.isInTiebreak {
-                    Text(controller.isSuperTiebreak ? "MATCH TIEBREAK" : "TIEBREAK")
-                        .font(.system(size: 9, weight: .black))
-                        .foregroundStyle(Color.bcAccent)
+                    Text(controller.isSuperTiebreak ? "Match tiebreak" : "Tiebreak")
+                        .modifier(LabelModifier(color: .bcText, size: 10))
                 }
             }
 
             Spacer()
 
             Button {
-                withAnimation(.easeInOut(duration: 0.15)) { controller.undo() }
+                withAnimation(reduceMotion ? nil : .bcQuick) { controller.undo() }
             } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.uturn.backward")
-                    Text("Undo")
-                }
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(controller.canUndo ? Color.bcMuted : Color.bcBorder)
-                .padding(.horizontal, 10).padding(.vertical, 6)
-                .background(controller.canUndo ? Color.bcCard : Color.clear)
-                .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
+                Label("Undo", systemImage: "arrow.uturn.backward")
             }
+            .buttonStyle(.bcSecondary)
             .disabled(!controller.canUndo)
         }
         .padding(.horizontal, BCLayout.horizontalMargin)
@@ -110,7 +107,7 @@ struct InMatchView: View {
             }
             if !controller.isOver {
                 Text("G").cardLabelStyle().frame(width: 38)
-                Text("PTS").cardLabelStyle(accent: true).frame(width: 52)
+                Text("PTS").cardLabelStyle().frame(width: 52)
             }
         }
         .padding(.vertical, 8)
@@ -131,13 +128,13 @@ struct InMatchView: View {
                 if serving {
                     Image(systemName: "tennisball.fill")
                         .font(.system(size: 8))
-                        .foregroundStyle(Color.bcAccent)
+                        .foregroundStyle(Color.bcText)
                 } else {
                     Spacer().frame(width: 12)
                 }
-                Text(name.uppercased())
-                    .font(.system(size: 13, weight: .black))
-                    .foregroundStyle(Color.white)
+                Text(name)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.bcText)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -148,8 +145,9 @@ struct InMatchView: View {
                 let val = isHome ? sets[i].home : sets[i].away
                 let won = isHome ? sets[i].homeWon : sets[i].awayWon
                 Text(sets[i].isSuperTiebreak ? "[\(val)]" : "\(val)")
-                    .font(.system(size: 14, weight: won ? .black : .regular))
+                    .font(.bcMono(15, won ? .bold : .regular))
                     .foregroundStyle(won ? Color.bcAccent : Color.bcMuted)
+                    .contentTransition(.numericText(value: Double(val)))
                     .frame(width: 34)
             }
 
@@ -158,13 +156,15 @@ struct InMatchView: View {
                 let curSet = sets.last!
                 let curGames = isHome ? curSet.home : curSet.away
                 Text("\(curGames)")
-                    .font(.system(size: 20, weight: .black))
-                    .foregroundStyle(Color.white)
+                    .font(.bcMono(20, .bold))
+                    .foregroundStyle(Color.bcText)
+                    .contentTransition(.numericText(value: Double(curGames)))
                     .frame(width: 38)
 
                 Text(ptsLabel)
-                    .font(.system(size: 18, weight: .black))
-                    .foregroundStyle(Color.bcAccent)
+                    .font(.bcMono(18, .bold))
+                    .foregroundStyle(Color.bcText)
+                    .contentTransition(.numericText())
                     .frame(width: 52)
                     .multilineTextAlignment(.center)
             }
@@ -193,7 +193,8 @@ struct InMatchView: View {
         let serving = controller.currentServer == side
 
         Button {
-            controller.scorePoint(for: side)
+            // Numbers roll in 0.2 s; an interruptible spring, so fast tapping is never held up.
+            withAnimation(reduceMotion ? nil : .bcQuick) { controller.scorePoint(for: side) }
         } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: BCRadius.card)
@@ -204,12 +205,13 @@ struct InMatchView: View {
                     if serving {
                         Image(systemName: "tennisball.fill")
                             .font(.system(size: 12))
-                            .foregroundStyle(Color.bcAccent)
+                            .foregroundStyle(Color.bcText)
                     }
-                    Text(name.uppercased())
+                    Text(name)
                         .playerNameStyle()
                         .lineLimit(1)
-                    Text("POINT")
+                        .minimumScaleFactor(0.6)
+                    Text("Point")
                         .stepLabelStyle()
                 }
             }
@@ -221,13 +223,8 @@ struct InMatchView: View {
 
     // MARK: - Match over
 
-    private var matchOverView: some View {
+    private var matchOverPanel: some View {
         VStack(spacing: 0) {
-            topBar
-
-            scoreboardCard
-                .padding(.horizontal, BCLayout.horizontalMargin)
-
             Spacer()
 
             VStack(spacing: 12) {
@@ -237,21 +234,22 @@ struct InMatchView: View {
                         Image(systemName: "trophy.fill")
                             .font(.system(size: 36, weight: .black))
                             .foregroundStyle(Color.bcAccent)
-                        Text(winName.uppercased()).playerNameStyle()
+                            .symbolEffect(.bounce, value: celebrate)
+                        Text(winName)
+                            .font(.bcSerif(40))
+                            .foregroundStyle(Color.bcAccent)   // the winner
                         Text("wins the match").stepLabelStyle()
                     }
                     .padding(.bottom, 8)
                 }
 
-                Button(action: onEnd) {
-                    Text("Done").primaryButtonStyle()
-                        .frame(maxWidth: .infinity).frame(height: 64)
-                        .background(Color.bcAccent)
-                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
-                }
-                .padding(.horizontal, BCLayout.horizontalMargin)
+                Button("Done", action: onEnd)
+                    .buttonStyle(.bcPrimary)
+                    .padding(.horizontal, BCLayout.horizontalMargin)
             }
             .padding(.bottom, 48)
         }
+        // One trophy bounce, landing with the controller's success haptic.
+        .onAppear { celebrate = !reduceMotion }
     }
 }

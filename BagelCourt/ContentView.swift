@@ -4,42 +4,26 @@ import SwiftData
 /// Root coordinator: NavigationStack + overlay presenters.
 struct ContentView: View {
     @State private var activeController: LiveMatchController? = nil
-    @State private var showingSettings = false
-    @Environment(\.modelContext) private var context
+    /// Sources for the system zoom transitions: sheets grow out of the button that opened them,
+    /// and a scorecard grows out of its history row.
+    @Namespace private var transitions
 
     var body: some View {
         NavigationStack {
-            HistoryView(
-                onNewMatch: { match in
-                    activeController = LiveMatchController(match: match, modelContext: context)
-                },
-                onResumeMatch: { ctrl in
-                    activeController = ctrl
-                }
-            )
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(Color.bcMuted)
-                    }
-                }
-            }
+            HistoryView(transitions: transitions, onResumeMatch: { ctrl in
+                activeController = ctrl
+            })
             .navigationDestination(for: MatchRecord.self) { record in
                 ResultView(record: record)
+                    .navigationTransition(.zoom(sourceID: record.id, in: transitions))
             }
         }
         .preferredColorScheme(.dark)
+        .tint(Color.bcAccent)   // the AccentColor asset is empty, so untinted icons fell back to iOS blue
         .fullScreenCover(item: $activeController) { ctrl in
             InMatchView(controller: ctrl) {
                 activeController = nil
             }
-        }
-        .sheet(isPresented: $showingSettings) {
-            SettingsView()
         }
     }
 }

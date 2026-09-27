@@ -4,7 +4,6 @@ import SwiftUI
 struct ResultView: View {
     let record: MatchRecord
     @State private var shareImage: UIImage? = nil
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.displayScale) private var displayScale
 
     private var match: Match? { record.decoded }
@@ -15,19 +14,14 @@ struct ResultView: View {
 
             if let m = match {
                 ScrollView {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 16) {
                         scorecard(m)
-                            .padding(.horizontal, BCLayout.horizontalMargin)
-
                         metaRow(m)
-                            .padding(.horizontal, BCLayout.horizontalMargin)
-
-                        shareButton(m)
-                            .padding(.horizontal, BCLayout.horizontalMargin)
-
-                        Spacer(minLength: 40)
                     }
+                    .padding(.horizontal, BCLayout.horizontalMargin)
                     .padding(.top, 24)
+                    // Render up front so the first tap on Share opens the share sheet.
+                    .onAppear { renderScorecard(m, scale: displayScale) }
                 }
             } else {
                 Text("Could not load match.")
@@ -38,7 +32,15 @@ struct ResultView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("SCORECARD").wordmarkStyle()
+                Text("Scorecard").titleStyle()
+            }
+            // Share sits beside the title, as on the web, as the system's glass button.
+            if let img = shareImage {
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(item: Image(uiImage: img),
+                              preview: SharePreview("BagelCourt Scorecard", image: Image(uiImage: img)))
+                        .accessibilityLabel("Share scorecard")
+                }
             }
         }
     }
@@ -51,7 +53,7 @@ struct ResultView: View {
         VStack(spacing: 0) {
             // Header row
             HStack {
-                Text("PLAYER").cardLabelStyle().frame(maxWidth: .infinity, alignment: .leading)
+                Text("Player").cardLabelStyle().frame(maxWidth: .infinity, alignment: .leading)
                 ForEach(0..<sets.count, id: \.self) { i in
                     Text("S\(i+1)").cardLabelStyle().frame(width: 40)
                 }
@@ -61,7 +63,7 @@ struct ResultView: View {
             Divider().background(Color.bcBorder)
 
             playerResultRow(m, side: .home, sets: sets)
-            Divider().background(Color.bcBorder.opacity(0.4))
+            Divider().background(Color.bcBorder)
             playerResultRow(m, side: .away, sets: sets)
         }
         .background(Color.bcCard)
@@ -79,11 +81,11 @@ struct ResultView: View {
             HStack(spacing: 8) {
                 if isWinner {
                     Image(systemName: "trophy.fill")
-                        .font(.system(size: 10)).foregroundStyle(Color.bcAccent)
+                        .font(.system(size: 11)).foregroundStyle(Color.bcAccent)
                 }
-                Text(name.uppercased())
-                    .font(.system(size: 14, weight: isWinner ? .black : .regular))
-                    .foregroundStyle(isWinner ? Color.white : Color.bcMuted)
+                Text(name)
+                    .font(.system(size: 16, weight: isWinner ? .semibold : .regular))
+                    .foregroundStyle(isWinner ? Color.bcAccent : Color.bcText)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -92,7 +94,7 @@ struct ResultView: View {
                 let val = isHome ? sets[i].home : sets[i].away
                 let won = isHome ? sets[i].homeWon : sets[i].awayWon
                 Text(sets[i].isSuperTiebreak ? "[\(val)]" : "\(val)")
-                    .font(.system(size: 16, weight: won ? .black : .regular))
+                    .font(.bcMono(16, won ? .bold : .regular))
                     .foregroundStyle(won ? Color.bcAccent : Color.bcMuted)
                     .frame(width: 40)
             }
@@ -105,11 +107,11 @@ struct ResultView: View {
     @ViewBuilder
     private func metaRow(_ m: Match) -> some View {
         HStack(spacing: 24) {
-            metaItem(label: "FORMAT", value: m.format.displayLabel.uppercased())
-            metaItem(label: "STARTED", value: record.startDate.formatted(date: .abbreviated, time: .shortened))
+            metaItem(label: "Format", value: m.format.displayLabel)
+            metaItem(label: "Started", value: record.startDate.formatted(date: .abbreviated, time: .shortened))
             if let end = record.endDate {
                 let dur = end.timeIntervalSince(m.startDate)
-                metaItem(label: "DURATION", value: durationString(dur))
+                metaItem(label: "Duration", value: durationString(dur))
             }
         }
         .frame(maxWidth: .infinity)
@@ -120,11 +122,11 @@ struct ResultView: View {
     }
 
     private func metaItem(label: String, value: String) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
             Text(label).cardLabelStyle()
             Text(value)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(Color.white)
+                .font(.bcMono(12))
+                .foregroundStyle(Color.bcText)
                 .multilineTextAlignment(.center)
         }
     }
@@ -137,30 +139,6 @@ struct ResultView: View {
     }
 
     // MARK: - Share
-
-    @ViewBuilder
-    private func shareButton(_ m: Match) -> some View {
-        if let img = shareImage {
-            ShareLink(item: Image(uiImage: img), preview: SharePreview("BagelCourt Scorecard", image: Image(uiImage: img))) {
-                Text("Share Scorecard").primaryButtonStyle()
-                    .frame(maxWidth: .infinity).frame(height: 64)
-                    .background(Color.bcAccent)
-                    .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
-            }
-        } else {
-            Button {
-                renderScorecard(m, scale: displayScale)
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "square.and.arrow.up")
-                    Text("Share Scorecard").primaryButtonStyle()
-                }
-                .frame(maxWidth: .infinity).frame(height: 64)
-                .background(Color.bcAccent)
-                .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
-            }
-        }
-    }
 
     @MainActor
     private func renderScorecard(_ m: Match, scale: CGFloat) {
@@ -178,14 +156,11 @@ struct ResultView: View {
 private struct ScorecardRenderView: View {
     let match: Match
     var body: some View {
-        VStack(spacing: 16) {
-            HStack {
-                HStack(spacing: 6) {
-                    Image(systemName: "tennisball")
-                        .foregroundStyle(Color.bcAccent)
-                    Text("BAGEL COURT").wordmarkStyle()
-                }
-                Spacer()
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "tennisball")
+                    .foregroundStyle(Color.bcAccent)
+                Text("BagelCourt").wordmarkStyle()
             }
 
             let sets = match.allSets
@@ -194,26 +169,24 @@ private struct ScorecardRenderView: View {
                 let name   = isHome ? match.homeDisplayName : match.awayDisplayName
                 let won    = match.winner == side
                 HStack {
-                    Text(name.uppercased())
-                        .font(.system(size: 14, weight: won ? .black : .regular))
-                        .foregroundStyle(won ? Color.white : Color.bcMuted)
+                    Text(name)
+                        .font(.system(size: 15, weight: won ? .semibold : .regular))
+                        .foregroundStyle(won ? Color.bcAccent : Color.bcText)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     ForEach(0..<sets.count, id: \.self) { i in
                         let v = isHome ? sets[i].home : sets[i].away
                         let w2 = isHome ? sets[i].homeWon : sets[i].awayWon
                         Text("\(v)")
-                            .font(.system(size: 15, weight: w2 ? .black : .regular))
+                            .font(.bcMono(15, w2 ? .bold : .regular))
                             .foregroundStyle(w2 ? Color.bcAccent : Color.bcMuted)
                             .frame(width: 32)
                     }
                 }
             }
 
-            Text(match.format.displayLabel.uppercased())
-                .cardLabelStyle()
-                .frame(maxWidth: .infinity, alignment: .leading)
+            Text(match.format.displayLabel).cardLabelStyle()
         }
-        .padding(20)
+        .padding(24)
         .background(Color.bcBg)
         .frame(width: 360)
     }

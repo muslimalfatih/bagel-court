@@ -28,9 +28,12 @@ struct SettingsView: View {
             }
             .navigationTitle("")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Text("SETTINGS").wordmarkStyle()
+                ToolbarItem(placement: .topBarLeading) {
+                    Text("Settings").titleStyle()
+                        .fixedSize()
+                        .accessibilityAddTraits(.isHeader)
                 }
+                .sharedBackgroundVisibility(.hidden)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                         .foregroundStyle(Color.bcAccent)
@@ -45,11 +48,13 @@ struct SettingsView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Color.bcAccent)
+                .foregroundStyle(Color.bcMuted)   // not tappable, so not gold
                 .frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).optionTitleStyle()
-                Text(subtitle).optionSubtitleStyle()
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.bcMuted)
             }
         }
         .padding(.vertical, 6)

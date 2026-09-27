@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 // MARK: - Format preset (UI-only concept; wraps MatchFormat)
 
@@ -35,8 +36,13 @@ enum FormatPreset: String, CaseIterable, Identifiable {
 // MARK: - SetupView
 
 struct SetupView: View {
-    var onStart: (Match) -> Void
+    /// Called when the match started from here ends (Done or Abandon); the owner closes Setup.
+    var onFinish: () -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Namespace private var segmentHighlight
+    @State private var controller: LiveMatchController?
 
     // Step 1
     @State private var matchType: MatchType = .singles
@@ -68,11 +74,11 @@ struct SetupView: View {
     }
 
     private var homeLabel: String {
-        if h1.isEmpty { return "HOME" }
+        if h1.isEmpty { return "Home" }
         return isDoubles && !h2.isEmpty ? "\(h1) / \(h2)" : h1
     }
     private var awayLabel: String {
-        if a1.isEmpty { return "AWAY" }
+        if a1.isEmpty { return "Away" }
         return isDoubles && !a2.isEmpty ? "\(a1) / \(a2)" : a1
     }
 
@@ -94,8 +100,13 @@ struct SetupView: View {
         return "\(matchType.rawValue) • \(preset.rawValue) • \(homeLabel.uppercased()) VS \(awayLabel.uppercased()) • \(srv) SERVES"
     }
 
+    /// Says what is still missing while Start Match is disabled.
+    private var missingNamesHint: String {
+        isDoubles ? "Add all four player names to start" : "Add both player names to start"
+    }
+
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             Color.bcBg.ignoresSafeArea()
 
             ScrollView {
@@ -107,14 +118,14 @@ struct SetupView: View {
                     stepBlock(number: "02", label: "Lineup")     { lineupStep }
                     stepBlock(number: "03", label: "Initial Serve") { serveStep }
                     stepBlock(number: "04", label: "Match Format") { formatStep }
-
-                    Spacer().frame(height: 160)   // room for the pinned bar
                 }
             }
-
-            summaryBar
+            .safeAreaInset(edge: .bottom, spacing: 0) { summaryBar }
         }
         .preferredColorScheme(.dark)
+        .fullScreenCover(item: $controller) { ctrl in
+            InMatchView(controller: ctrl, onEnd: onFinish)
+        }
     }
 
     // MARK: - Header
@@ -124,7 +135,7 @@ struct SetupView: View {
             HStack(spacing: 8) {
                 Image(systemName: "tennisball")
                     .foregroundStyle(Color.bcAccent)
-                Text("BAGEL COURT").wordmarkStyle()
+                Text("BagelCourt").wordmarkStyle()
             }
             Spacer()
             Button { dismiss() } label: {
@@ -159,19 +170,28 @@ struct SetupView: View {
         HStack(spacing: 0) {
             ForEach(MatchType.allCases, id: \.self) { type in
                 Button {
-                    matchType = type
+                    withAnimation(reduceMotion ? .bcQuick : .bcSmooth) { matchType = type }
                 } label: {
                     Text(type.rawValue)
                         .segmentStyle(selected: matchType == type)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(matchType == type ? Color.bcAccent : Color.clear)
+                        .background { if matchType == type { segmentFill } }
                 }
             }
         }
-        .background(Color.bcCard)
-        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
-        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
+        .padding(4)
+        .overlay(Capsule().stroke(Color.bcBorder, lineWidth: 1))
+    }
+
+    /// The selected segment's pill slides between options; under Reduce Motion it just fades.
+    @ViewBuilder
+    private var segmentFill: some View {
+        if reduceMotion {
+            Capsule().fill(Color.bcCardActive)
+        } else {
+            Capsule().fill(Color.bcCardActive).matchedGeometryEffect(id: "segment", in: segmentHighlight)
+        }
     }
 
     // MARK: - Step 2: Lineup
@@ -179,13 +199,9 @@ struct SetupView: View {
     private var lineupStep: some View {
         VStack(spacing: 12) {
             playerCard(side: .home)
-            Text("VS")
-                .font(.system(size: 10, weight: .black))
-                .foregroundStyle(Color.bcMuted)
+            Text("vs").cardLabelStyle()
                 .padding(.horizontal, 10).padding(.vertical, 4)
-                .background(Color.bcCard)
-                .clipShape(RoundedRectangle(cornerRadius: BCRadius.vsPill))
-                .overlay(RoundedRectangle(cornerRadius: BCRadius.vsPill).stroke(Color.bcBorder, lineWidth: 1))
+                .overlay(Capsule().stroke(Color.bcBorder, lineWidth: 1))
             playerCard(side: .away)
         }
     }
@@ -193,46 +209,32 @@ struct SetupView: View {
     @ViewBuilder
     private func playerCard(side: Side) -> some View {
         let isHome = side == .home
-        let accentEdge = isHome
 
         VStack(alignment: .leading, spacing: 10) {
-            Text(isHome ? "HOME" : "AWAY").cardLabelStyle(accent: isHome)
+            Text(isHome ? "Home" : "Away").cardLabelStyle()
 
-            nameField(placeholder: isHome ? "Player 1" : "Player 3",
+            nameField(placeholder: isHome ? "Player 1" : (isDoubles ? "Player 3" : "Player 2"),
                       text: isHome ? $homePlayer1 : $awayPlayer1)
 
             if isDoubles {
                 nameField(placeholder: isHome ? "Player 2" : "Player 4",
                           text: isHome ? $homePlayer2 : $awayPlayer2)
+                    .transition(.bcReveal(reduceMotion: reduceMotion))
             }
         }
         .padding(BCLayout.intraStepSpacing)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.bcCard)
         .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
-        .overlay(alignment: .leading) {
-            if accentEdge {
-                RoundedRectangle(cornerRadius: BCRadius.card)
-                    .fill(Color.bcAccent)
-                    .frame(width: 4)
-            }
-        }
-        .overlay {
-            if !accentEdge {
-                RoundedRectangle(cornerRadius: BCRadius.card)
-                    .stroke(Color.bcBorder, lineWidth: 1)
-            }
-        }
+        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
     }
 
     private func nameField(placeholder: String, text: Binding<String>) -> some View {
         TextField(placeholder, text: text)
-            .font(.system(size: 24, weight: .black))
-            .textCase(.uppercase)
-            .foregroundStyle(Color.white)
-            .tint(Color.bcAccent)
+            .font(.system(size: 22, weight: .semibold))
+            .foregroundStyle(Color.bcText)
             .autocorrectionDisabled()
-            .textInputAutocapitalization(.characters)
+            .textInputAutocapitalization(.words)
     }
 
     // MARK: - Step 3: Serve
@@ -254,14 +256,15 @@ struct SetupView: View {
 
     private var coinTossButton: some View {
         Button(action: flipCoin) {
-            HStack(spacing: 4) {
+            HStack(spacing: 5) {
                 Image(systemName: "circle.dashed")
+                    .font(.system(size: 11, weight: .semibold))
                     .rotationEffect(.degrees(coinAngle))
-                Text("Coin Toss").cardLabelStyle(accent: true)
+                Text("Coin toss").cardLabelStyle(accent: true)
             }
-            .padding(.horizontal, 10).padding(.vertical, 5)
-            .background(Color.bcAccentDim)
-            .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+            .foregroundStyle(Color.bcAccent)
+            .padding(.horizontal, 10).padding(.vertical, 6)
+            .overlay(Capsule().stroke(Color.bcAccent, lineWidth: 1))
         }
         .disabled(isFlipping)
     }
@@ -270,23 +273,27 @@ struct SetupView: View {
         guard !isFlipping else { return }
         isFlipping = true
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        withAnimation(.easeInOut(duration: 0.7)) { coinAngle += 720 }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-            firstServer = Bool.random() ? .home : .away
-            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
-            isFlipping = false
-        }
+        let result: Side = Bool.random() ? .home : .away
+        guard !reduceMotion else { return reveal(result) }
+        withAnimation(.easeInOut(duration: 0.6)) { coinAngle += 720 } completion: { reveal(result) }
+    }
+
+    /// Shows the toss result the moment the coin stops, with the haptic on the same frame.
+    private func reveal(_ side: Side) {
+        withAnimation(.bcQuick) { firstServer = side }
+        UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        isFlipping = false
     }
 
     @ViewBuilder
     private func serveCard(for side: Side, name: String) -> some View {
         let selected = firstServer == side
-        Button { firstServer = side } label: {
+        Button { withAnimation(.bcQuick) { firstServer = side } } label: {
             VStack(spacing: 8) {
                 Image(systemName: "person")
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(selected ? Color.bcAccent : Color.bcMuted)
-                Text(name.isEmpty ? (side == .home ? "HOME" : "AWAY") : name)
+                Text(name.isEmpty ? (side == .home ? "Home" : "Away") : name)
                     .optionTitleStyle()
                     .lineLimit(1)
             }
@@ -314,7 +321,7 @@ struct SetupView: View {
 
             if preset == .custom {
                 customPanel
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .transition(.bcReveal(reduceMotion: reduceMotion))
             }
 
             if finalFormat.bestOf > 1 {
@@ -324,15 +331,15 @@ struct SetupView: View {
                         Text("Super tiebreak instead of final set").optionSubtitleStyle()
                     }
                 }
-                .tint(Color.bcAccent)
                 .padding(BCLayout.intraStepSpacing)
                 .background(Color.bcCard)
                 .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+                .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
                 .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: preset)
-        .animation(.easeInOut(duration: 0.2), value: finalFormat.bestOf)
+        .animation(.bcSmooth, value: preset)
+        .animation(.bcSmooth, value: finalFormat.bestOf)
     }
 
     @ViewBuilder
@@ -356,7 +363,6 @@ struct SetupView: View {
 
     private var customPanel: some View {
         VStack(spacing: 0) {
-            Divider().background(Color.bcCustomBorder)
             VStack(spacing: BCLayout.intraStepSpacing) {
                 stepperRow(
                     label: "Games Per Set",
@@ -376,6 +382,7 @@ struct SetupView: View {
         }
         .background(Color.bcCard)
         .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
         .onChange(of: customGames) { _, new in
             customTiebreak = min(customTiebreak, new)
         }
@@ -387,7 +394,7 @@ struct SetupView: View {
     ) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(label).stepperLabelStyle()
+                Text(label).optionTitleStyle()
                 Text(subtitle).optionSubtitleStyle()
             }
             Spacer()
@@ -396,15 +403,16 @@ struct SetupView: View {
                 Button {
                     if value.wrappedValue > range.lowerBound { value.wrappedValue -= 1 }
                 } label: {
-                    Text("–").font(.system(size: 16, weight: .black))
-                        .foregroundStyle(Color.white)
+                    Text("–").font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(Color.bcText)
                         .frame(width: 36, height: 36)
                         .background(Color.bcStepper)
-                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.stepper))
+                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.control))
                 }
 
                 Text("\(value.wrappedValue)")
-                    .stepperLabelStyle()
+                    .font(.bcMono(17, .medium))
+                    .foregroundStyle(Color.bcText)
                     .frame(width: 40)
                     .multilineTextAlignment(.center)
 
@@ -412,11 +420,11 @@ struct SetupView: View {
                 Button {
                     if value.wrappedValue < range.upperBound { value.wrappedValue += 1 }
                 } label: {
-                    Text("+").font(.system(size: 16, weight: .black))
-                        .foregroundStyle(Color.black)
+                    Text("+").font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(Color.bcOnAccent)
                         .frame(width: 36, height: 36)
                         .background(Color.bcAccent)
-                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.stepper))
+                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.control))
                 }
             }
         }
@@ -430,23 +438,21 @@ struct SetupView: View {
 
             VStack(spacing: 12) {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    Text(summaryText).summaryBarStyle(accent: false)
+                    Text(canStart ? summaryText : missingNamesHint).summaryBarStyle(accent: false)
                         .lineLimit(1)
                 }
 
-                Button(action: startMatch) {
-                    Text("Start Match").primaryButtonStyle()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 64)
-                        .background(canStart ? Color.bcAccent : Color.bcBorder)
-                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
-                }
-                .disabled(!canStart)
+                Button("Start Match", action: startMatch)
+                    .buttonStyle(.bcPrimary)
+                    .disabled(!canStart)
+                .animation(.bcQuick, value: canStart)
+                .accessibilityHint(canStart ? "" : missingNamesHint)
             }
             .padding(.horizontal, BCLayout.horizontalMargin)
             .padding(.vertical, 16)
-            .background(.ultraThinMaterial.opacity(0.95))
         }
+        // Opaque, so the form never shows through the pinned bar.
+        .background(Color.bcBg.ignoresSafeArea(edges: .bottom))
     }
 
     private func startMatch() {
@@ -460,8 +466,8 @@ struct SetupView: View {
             format: finalFormat,
             initialServer: firstServer
         )
-        onStart(match)
-        dismiss()
+        // Presented over Setup: one motion up, instead of Setup closing and the match opening after it.
+        controller = LiveMatchController(match: match, modelContext: context)
     }
 }
 
@@ -469,8 +475,8 @@ struct SetupView: View {
 
 private extension View {
     func segmentStyle(selected: Bool) -> some View {
-        self.font(.system(size: 14, weight: .bold))
+        self.font(.bcMono(12, .medium)).tracking(0.96)
             .textCase(.uppercase)
-            .foregroundStyle(selected ? Color.black : Color.bcMuted)
+            .foregroundStyle(selected ? Color.bcText : Color.bcMuted)
     }
 }
