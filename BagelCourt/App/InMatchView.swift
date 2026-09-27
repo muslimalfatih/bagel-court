@@ -19,6 +19,12 @@ struct InMatchView: View {
             // The top bar and scoreboard stay put; only the area below changes when the match ends.
             VStack(spacing: 0) {
                 topBar
+                // The courtside board: the current game score, readable from across the net.
+                DotMatrixBoard(text: controller.isOver
+                               ? "FINAL"
+                               : controller.gameScore.displayString(server: controller.currentServer))
+                    .padding(.horizontal, BCLayout.horizontalMargin)
+                    .padding(.bottom, 16)
                 scoreboardCard
                     .padding(.horizontal, BCLayout.horizontalMargin)
                     .padding(.bottom, 12)
