@@ -1,13 +1,13 @@
 //
-//  tennisUITestsLaunchTests.swift
-//  tennisUITests
+//  BagelCourtUITestsLaunchTests.swift
+//  BagelCourtUITests
 //
 //  Created by Muslim on 06/09/26.
 //
 
 import XCTest
 
-final class tennisUITestsLaunchTests: XCTestCase {
+final class BagelCourtUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

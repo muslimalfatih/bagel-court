@@ -1,14 +1,14 @@
 //
-//  tennisTests.swift
-//  tennisTests
+//  BagelCourtTests.swift
+//  BagelCourtTests
 //
 //  Created by Muslim on 06/09/26.
 //
 
 import Testing
-@testable import tennis
+@testable import BagelCourt
 
-struct tennisTests {
+struct BagelCourtTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

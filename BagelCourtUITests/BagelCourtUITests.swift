@@ -1,13 +1,13 @@
 //
-//  tennisUITests.swift
-//  tennisUITests
+//  BagelCourtUITests.swift
+//  BagelCourtUITests
 //
 //  Created by Muslim on 06/09/26.
 //
 
 import XCTest
 
-final class tennisUITests: XCTestCase {
+final class BagelCourtUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

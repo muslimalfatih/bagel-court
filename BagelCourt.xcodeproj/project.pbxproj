@@ -12,37 +12,37 @@
 			containerPortal = BE174FA1304DA5C3008FBF26 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = BE174FA8304DA5C3008FBF26;
-			remoteInfo = tennis;
+			remoteInfo = BagelCourt;
 		};
 		BE174FC1304DA5C4008FBF26 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BE174FA1304DA5C3008FBF26 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = BE174FA8304DA5C3008FBF26;
-			remoteInfo = tennis;
+			remoteInfo = BagelCourt;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		BE174FA9304DA5C3008FBF26 /* tennis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tennis.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		BE174FB6304DA5C4008FBF26 /* tennisTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tennisTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BE174FC0304DA5C4008FBF26 /* tennisUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tennisUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE174FA9304DA5C3008FBF26 /* BagelCourt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BagelCourt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE174FB6304DA5C4008FBF26 /* BagelCourtTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BagelCourtTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE174FC0304DA5C4008FBF26 /* BagelCourtUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BagelCourtUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		BE174FAB304DA5C3008FBF26 /* tennis */ = {
+		BE174FAB304DA5C3008FBF26 /* BagelCourt */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = tennis;
+			path = BagelCourt;
 			sourceTree = "<group>";
 		};
-		BE174FB9304DA5C4008FBF26 /* tennisTests */ = {
+		BE174FB9304DA5C4008FBF26 /* BagelCourtTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = tennisTests;
+			path = BagelCourtTests;
 			sourceTree = "<group>";
 		};
-		BE174FC3304DA5C4008FBF26 /* tennisUITests */ = {
+		BE174FC3304DA5C4008FBF26 /* BagelCourtUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = tennisUITests;
+			path = BagelCourtUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +75,9 @@
 		BE174FA0304DA5C3008FBF26 = {
 			isa = PBXGroup;
 			children = (
-				BE174FAB304DA5C3008FBF26 /* tennis */,
-				BE174FB9304DA5C4008FBF26 /* tennisTests */,
-				BE174FC3304DA5C4008FBF26 /* tennisUITests */,
+				BE174FAB304DA5C3008FBF26 /* BagelCourt */,
+				BE174FB9304DA5C4008FBF26 /* BagelCourtTests */,
+				BE174FC3304DA5C4008FBF26 /* BagelCourtUITests */,
 				BE174FAA304DA5C3008FBF26 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,9 +85,9 @@
 		BE174FAA304DA5C3008FBF26 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BE174FA9304DA5C3008FBF26 /* tennis.app */,
-				BE174FB6304DA5C4008FBF26 /* tennisTests.xctest */,
-				BE174FC0304DA5C4008FBF26 /* tennisUITests.xctest */,
+				BE174FA9304DA5C3008FBF26 /* BagelCourt.app */,
+				BE174FB6304DA5C4008FBF26 /* BagelCourtTests.xctest */,
+				BE174FC0304DA5C4008FBF26 /* BagelCourtUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BE174FA8304DA5C3008FBF26 /* tennis */ = {
+		BE174FA8304DA5C3008FBF26 /* BagelCourt */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BE174FCA304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "tennis" */;
+			buildConfigurationList = BE174FCA304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "BagelCourt" */;
 			buildPhases = (
 				BE174FA5304DA5C3008FBF26 /* Sources */,
 				BE174FA6304DA5C3008FBF26 /* Frameworks */,
@@ -108,18 +108,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				BE174FAB304DA5C3008FBF26 /* tennis */,
+				BE174FAB304DA5C3008FBF26 /* BagelCourt */,
 			);
-			name = tennis;
+			name = BagelCourt;
 			packageProductDependencies = (
 			);
-			productName = tennis;
-			productReference = BE174FA9304DA5C3008FBF26 /* tennis.app */;
+			productName = BagelCourt;
+			productReference = BE174FA9304DA5C3008FBF26 /* BagelCourt.app */;
 			productType = "com.apple.product-type.application";
 		};
-		BE174FB5304DA5C4008FBF26 /* tennisTests */ = {
+		BE174FB5304DA5C4008FBF26 /* BagelCourtTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BE174FCD304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "tennisTests" */;
+			buildConfigurationList = BE174FCD304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "BagelCourtTests" */;
 			buildPhases = (
 				BE174FB2304DA5C4008FBF26 /* Sources */,
 				BE174FB3304DA5C4008FBF26 /* Frameworks */,
@@ -131,18 +131,18 @@
 				BE174FB8304DA5C4008FBF26 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				BE174FB9304DA5C4008FBF26 /* tennisTests */,
+				BE174FB9304DA5C4008FBF26 /* BagelCourtTests */,
 			);
-			name = tennisTests;
+			name = BagelCourtTests;
 			packageProductDependencies = (
 			);
-			productName = tennisTests;
-			productReference = BE174FB6304DA5C4008FBF26 /* tennisTests.xctest */;
+			productName = BagelCourtTests;
+			productReference = BE174FB6304DA5C4008FBF26 /* BagelCourtTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		BE174FBF304DA5C4008FBF26 /* tennisUITests */ = {
+		BE174FBF304DA5C4008FBF26 /* BagelCourtUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BE174FD0304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "tennisUITests" */;
+			buildConfigurationList = BE174FD0304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "BagelCourtUITests" */;
 			buildPhases = (
 				BE174FBC304DA5C4008FBF26 /* Sources */,
 				BE174FBD304DA5C4008FBF26 /* Frameworks */,
@@ -154,13 +154,13 @@
 				BE174FC2304DA5C4008FBF26 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				BE174FC3304DA5C4008FBF26 /* tennisUITests */,
+				BE174FC3304DA5C4008FBF26 /* BagelCourtUITests */,
 			);
-			name = tennisUITests;
+			name = BagelCourtUITests;
 			packageProductDependencies = (
 			);
-			productName = tennisUITests;
-			productReference = BE174FC0304DA5C4008FBF26 /* tennisUITests.xctest */;
+			productName = BagelCourtUITests;
+			productReference = BE174FC0304DA5C4008FBF26 /* BagelCourtUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BE174FA4304DA5C3008FBF26 /* Build configuration list for PBXProject "tennis" */;
+			buildConfigurationList = BE174FA4304DA5C3008FBF26 /* Build configuration list for PBXProject "BagelCourt" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BE174FA8304DA5C3008FBF26 /* tennis */,
-				BE174FB5304DA5C4008FBF26 /* tennisTests */,
-				BE174FBF304DA5C4008FBF26 /* tennisUITests */,
+				BE174FA8304DA5C3008FBF26 /* BagelCourt */,
+				BE174FB5304DA5C4008FBF26 /* BagelCourtTests */,
+				BE174FBF304DA5C4008FBF26 /* BagelCourtUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		BE174FB8304DA5C4008FBF26 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = BE174FA8304DA5C3008FBF26 /* tennis */;
+			target = BE174FA8304DA5C3008FBF26 /* BagelCourt */;
 			targetProxy = BE174FB7304DA5C4008FBF26 /* PBXContainerItemProxy */;
 		};
 		BE174FC2304DA5C4008FBF26 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = BE174FA8304DA5C3008FBF26 /* tennis */;
+			target = BE174FA8304DA5C3008FBF26 /* BagelCourt */;
 			targetProxy = BE174FC1304DA5C4008FBF26 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -400,6 +400,7 @@
 				DEVELOPMENT_TEAM = FWK6Y9N4Z3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = BagelCourt;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -410,7 +411,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alegori.tennis;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muslimalfatih.bagelcourt;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -432,6 +433,7 @@
 				DEVELOPMENT_TEAM = FWK6Y9N4Z3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = BagelCourt;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -442,7 +444,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alegori.tennis;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muslimalfatih.bagelcourt;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -464,7 +466,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alegori.tennisTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muslimalfatih.bagelcourtTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -472,7 +474,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tennis.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tennis";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BagelCourt.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BagelCourt";
 			};
 			name = Debug;
 		};
@@ -486,7 +488,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alegori.tennisTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muslimalfatih.bagelcourtTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -494,7 +496,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tennis.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/tennis";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BagelCourt.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BagelCourt";
 			};
 			name = Release;
 		};
@@ -506,7 +508,7 @@
 				DEVELOPMENT_TEAM = FWK6Y9N4Z3;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alegori.tennisUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muslimalfatih.bagelcourtUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -514,7 +516,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = tennis;
+				TEST_TARGET_NAME = BagelCourt;
 			};
 			name = Debug;
 		};
@@ -526,7 +528,7 @@
 				DEVELOPMENT_TEAM = FWK6Y9N4Z3;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alegori.tennisUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muslimalfatih.bagelcourtUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -534,14 +536,14 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = tennis;
+				TEST_TARGET_NAME = BagelCourt;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BE174FA4304DA5C3008FBF26 /* Build configuration list for PBXProject "tennis" */ = {
+		BE174FA4304DA5C3008FBF26 /* Build configuration list for PBXProject "BagelCourt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BE174FC8304DA5C4008FBF26 /* Debug */,
@@ -550,7 +552,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE174FCA304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "tennis" */ = {
+		BE174FCA304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "BagelCourt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BE174FCB304DA5C4008FBF26 /* Debug */,
@@ -559,7 +561,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE174FCD304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "tennisTests" */ = {
+		BE174FCD304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "BagelCourtTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BE174FCE304DA5C4008FBF26 /* Debug */,
@@ -568,7 +570,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE174FD0304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "tennisUITests" */ = {
+		BE174FD0304DA5C4008FBF26 /* Build configuration list for PBXNativeTarget "BagelCourtUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BE174FD1304DA5C4008FBF26 /* Debug */,
