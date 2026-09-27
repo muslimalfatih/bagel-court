@@ -4,18 +4,18 @@ import SwiftUI
 // Exact token values from the spec — do not change these to semantic colours.
 
 extension Color {
-    static let cbBg           = Color(cbHex: "#0E0E0E")
-    static let cbCard         = Color(cbHex: "#131313")
-    static let cbCardActive   = Color(cbHex: "#201F1F")
-    static let cbAccent       = Color(cbHex: "#CDFF67")
-    static let cbAccentDim    = Color(cbHex: "#CDFF67").opacity(0.10)
-    static let cbMuted        = Color(cbHex: "#ADAAAA")
-    static let cbBorder       = Color(cbHex: "#262626")
-    static let cbStepper      = Color(cbHex: "#2C2C2C")
-    static let cbCustomBorder = Color(cbHex: "#CDFF67").opacity(0.20)
+    static let bcBg           = Color(bcHex: "#0E0E0E")
+    static let bcCard         = Color(bcHex: "#131313")
+    static let bcCardActive   = Color(bcHex: "#201F1F")
+    static let bcAccent       = Color(bcHex: "#CDFF67")
+    static let bcAccentDim    = Color(bcHex: "#CDFF67").opacity(0.10)
+    static let bcMuted        = Color(bcHex: "#ADAAAA")
+    static let bcBorder       = Color(bcHex: "#262626")
+    static let bcStepper      = Color(bcHex: "#2C2C2C")
+    static let bcCustomBorder = Color(bcHex: "#CDFF67").opacity(0.20)
 
     /// Initialise from a CSS-style hex string, e.g. "#CDFF67" or "CDFF67".
-    init(cbHex hex: String) {
+    init(bcHex hex: String) {
         var str = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         if str.hasPrefix("#") { str.removeFirst() }
         var raw: UInt64 = 0
@@ -33,14 +33,14 @@ extension Color {
 struct WordmarkModifier: ViewModifier {
     func body(content: Content) -> some View {
         content.font(.system(size: 20, weight: .black)).tracking(2.0)
-            .textCase(.uppercase).foregroundStyle(Color.cbAccent)
+            .textCase(.uppercase).foregroundStyle(Color.bcAccent)
     }
 }
 
 struct StepLabelModifier: ViewModifier {
     func body(content: Content) -> some View {
         content.font(.system(size: 10, weight: .bold)).tracking(2.0)
-            .textCase(.uppercase).foregroundStyle(Color.cbMuted)
+            .textCase(.uppercase).foregroundStyle(Color.bcMuted)
     }
 }
 
@@ -48,7 +48,7 @@ struct CardLabelModifier: ViewModifier {
     var accent: Bool
     func body(content: Content) -> some View {
         content.font(.system(size: 10, weight: .bold)).tracking(1.0)
-            .textCase(.uppercase).foregroundStyle(accent ? Color.cbAccent : Color.cbMuted)
+            .textCase(.uppercase).foregroundStyle(accent ? Color.bcAccent : Color.bcMuted)
     }
 }
 
@@ -69,7 +69,7 @@ struct OptionTitleModifier: ViewModifier {
 struct OptionSubtitleModifier: ViewModifier {
     func body(content: Content) -> some View {
         content.font(.system(size: 10, weight: .medium))
-            .textCase(.uppercase).foregroundStyle(Color.cbMuted)
+            .textCase(.uppercase).foregroundStyle(Color.bcMuted)
     }
 }
 
@@ -84,7 +84,7 @@ struct SummaryBarModifier: ViewModifier {
     var accent: Bool
     func body(content: Content) -> some View {
         content.font(.system(size: 10, weight: .black)).tracking(3.0)
-            .textCase(.uppercase).foregroundStyle(accent ? Color.cbAccent : Color.white)
+            .textCase(.uppercase).foregroundStyle(accent ? Color.bcAccent : Color.white)
     }
 }
 
@@ -117,7 +117,7 @@ extension View {
 
 // MARK: - Corner radii (spec values)
 
-enum CBRadius {
+enum BCRadius {
     static let card: CGFloat     = 8
     static let button: CGFloat   = 4
     static let stepper: CGFloat  = 2
@@ -126,7 +126,7 @@ enum CBRadius {
 
 // MARK: - Layout constants
 
-enum CBLayout {
+enum BCLayout {
     static let horizontalMargin: CGFloat = 24
     static let stepSpacing: CGFloat      = 48
     static let intraStepSpacing: CGFloat = 16

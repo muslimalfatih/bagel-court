@@ -13,7 +13,7 @@ struct InMatchView: View {
 
     var body: some View {
         ZStack {
-            Color.cbBg.ignoresSafeArea()
+            Color.bcBg.ignoresSafeArea()
 
             if controller.isOver {
                 matchOverView
@@ -21,7 +21,7 @@ struct InMatchView: View {
                 VStack(spacing: 0) {
                     topBar
                     scoreboardCard
-                        .padding(.horizontal, CBLayout.horizontalMargin)
+                        .padding(.horizontal, BCLayout.horizontalMargin)
                         .padding(.bottom, 12)
                     scoringArea
                 }
@@ -45,7 +45,7 @@ struct InMatchView: View {
             Button { showAbandonAlert = true } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Color.cbMuted)
+                    .foregroundStyle(Color.bcMuted)
                     .frame(width: 36, height: 36)
             }
 
@@ -57,7 +57,7 @@ struct InMatchView: View {
                 if controller.isInTiebreak {
                     Text(controller.isSuperTiebreak ? "MATCH TIEBREAK" : "TIEBREAK")
                         .font(.system(size: 9, weight: .black))
-                        .foregroundStyle(Color.cbAccent)
+                        .foregroundStyle(Color.bcAccent)
                 }
             }
 
@@ -71,14 +71,14 @@ struct InMatchView: View {
                     Text("Undo")
                 }
                 .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(controller.canUndo ? Color.cbMuted : Color.cbBorder)
+                .foregroundStyle(controller.canUndo ? Color.bcMuted : Color.bcBorder)
                 .padding(.horizontal, 10).padding(.vertical, 6)
-                .background(controller.canUndo ? Color.cbCard : Color.clear)
-                .clipShape(RoundedRectangle(cornerRadius: CBRadius.button))
+                .background(controller.canUndo ? Color.bcCard : Color.clear)
+                .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
             }
             .disabled(!controller.canUndo)
         }
-        .padding(.horizontal, CBLayout.horizontalMargin)
+        .padding(.horizontal, BCLayout.horizontalMargin)
         .padding(.top, 56)
         .padding(.bottom, 16)
     }
@@ -91,14 +91,14 @@ struct InMatchView: View {
 
         return VStack(spacing: 0) {
             columnHeaders(completedCount: completedCount, sets: sets)
-            Divider().background(Color.cbBorder)
+            Divider().background(Color.bcBorder)
             playerRow(.home, sets: sets, completedCount: completedCount)
-            Divider().background(Color.cbBorder.opacity(0.5))
+            Divider().background(Color.bcBorder.opacity(0.5))
             playerRow(.away, sets: sets, completedCount: completedCount)
         }
-        .background(Color.cbCard)
-        .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
-        .overlay(RoundedRectangle(cornerRadius: CBRadius.card).stroke(Color.cbBorder, lineWidth: 1))
+        .background(Color.bcCard)
+        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
     }
 
     @ViewBuilder
@@ -131,7 +131,7 @@ struct InMatchView: View {
                 if serving {
                     Image(systemName: "tennisball.fill")
                         .font(.system(size: 8))
-                        .foregroundStyle(Color.cbAccent)
+                        .foregroundStyle(Color.bcAccent)
                 } else {
                     Spacer().frame(width: 12)
                 }
@@ -149,7 +149,7 @@ struct InMatchView: View {
                 let won = isHome ? sets[i].homeWon : sets[i].awayWon
                 Text(sets[i].isSuperTiebreak ? "[\(val)]" : "\(val)")
                     .font(.system(size: 14, weight: won ? .black : .regular))
-                    .foregroundStyle(won ? Color.cbAccent : Color.cbMuted)
+                    .foregroundStyle(won ? Color.bcAccent : Color.bcMuted)
                     .frame(width: 34)
             }
 
@@ -164,7 +164,7 @@ struct InMatchView: View {
 
                 Text(ptsLabel)
                     .font(.system(size: 18, weight: .black))
-                    .foregroundStyle(Color.cbAccent)
+                    .foregroundStyle(Color.bcAccent)
                     .frame(width: 52)
                     .multilineTextAlignment(.center)
             }
@@ -182,7 +182,7 @@ struct InMatchView: View {
                 pointButton(for: .away, height: (geo.size.height - 2) / 2)
             }
         }
-        .padding(.horizontal, CBLayout.horizontalMargin)
+        .padding(.horizontal, BCLayout.horizontalMargin)
         .padding(.bottom, 24)
     }
 
@@ -196,15 +196,15 @@ struct InMatchView: View {
             controller.scorePoint(for: side)
         } label: {
             ZStack {
-                RoundedRectangle(cornerRadius: CBRadius.card)
-                    .fill(Color.cbCard)
-                    .overlay(RoundedRectangle(cornerRadius: CBRadius.card).stroke(Color.cbBorder, lineWidth: 1))
+                RoundedRectangle(cornerRadius: BCRadius.card)
+                    .fill(Color.bcCard)
+                    .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
 
                 VStack(spacing: 8) {
                     if serving {
                         Image(systemName: "tennisball.fill")
                             .font(.system(size: 12))
-                            .foregroundStyle(Color.cbAccent)
+                            .foregroundStyle(Color.bcAccent)
                     }
                     Text(name.uppercased())
                         .playerNameStyle()
@@ -226,7 +226,7 @@ struct InMatchView: View {
             topBar
 
             scoreboardCard
-                .padding(.horizontal, CBLayout.horizontalMargin)
+                .padding(.horizontal, BCLayout.horizontalMargin)
 
             Spacer()
 
@@ -236,7 +236,7 @@ struct InMatchView: View {
                     VStack(spacing: 6) {
                         Image(systemName: "trophy.fill")
                             .font(.system(size: 36, weight: .black))
-                            .foregroundStyle(Color.cbAccent)
+                            .foregroundStyle(Color.bcAccent)
                         Text(winName.uppercased()).playerNameStyle()
                         Text("wins the match").stepLabelStyle()
                     }
@@ -246,10 +246,10 @@ struct InMatchView: View {
                 Button(action: onEnd) {
                     Text("Done").primaryButtonStyle()
                         .frame(maxWidth: .infinity).frame(height: 64)
-                        .background(Color.cbAccent)
-                        .clipShape(RoundedRectangle(cornerRadius: CBRadius.button))
+                        .background(Color.bcAccent)
+                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
                 }
-                .padding(.horizontal, CBLayout.horizontalMargin)
+                .padding(.horizontal, BCLayout.horizontalMargin)
             }
             .padding(.bottom, 48)
         }

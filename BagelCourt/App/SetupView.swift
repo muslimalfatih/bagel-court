@@ -96,12 +96,12 @@ struct SetupView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.cbBg.ignoresSafeArea()
+            Color.bcBg.ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 0) {
                     header
-                    Divider().background(Color.cbBorder).padding(.bottom, CBLayout.stepSpacing)
+                    Divider().background(Color.bcBorder).padding(.bottom, BCLayout.stepSpacing)
 
                     stepBlock(number: "01", label: "Match Type") { typeStep }
                     stepBlock(number: "02", label: "Lineup")     { lineupStep }
@@ -123,17 +123,17 @@ struct SetupView: View {
         HStack {
             HStack(spacing: 8) {
                 Image(systemName: "tennisball")
-                    .foregroundStyle(Color.cbAccent)
-                Text("COURT BOARD").wordmarkStyle()
+                    .foregroundStyle(Color.bcAccent)
+                Text("BAGEL COURT").wordmarkStyle()
             }
             Spacer()
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Color.cbMuted)
+                    .foregroundStyle(Color.bcMuted)
             }
         }
-        .padding(.horizontal, CBLayout.horizontalMargin)
+        .padding(.horizontal, BCLayout.horizontalMargin)
         .padding(.vertical, 20)
     }
 
@@ -142,15 +142,15 @@ struct SetupView: View {
     private func stepBlock<Content: View>(
         number: String, label: String, @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: CBLayout.intraStepSpacing) {
+        VStack(alignment: .leading, spacing: BCLayout.intraStepSpacing) {
             HStack(spacing: 8) {
                 Text(number).stepLabelStyle()
                 Text(label).stepLabelStyle()
             }
             content()
         }
-        .padding(.horizontal, CBLayout.horizontalMargin)
-        .padding(.bottom, CBLayout.stepSpacing)
+        .padding(.horizontal, BCLayout.horizontalMargin)
+        .padding(.bottom, BCLayout.stepSpacing)
     }
 
     // MARK: - Step 1: Match Type
@@ -165,13 +165,13 @@ struct SetupView: View {
                         .segmentStyle(selected: matchType == type)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(matchType == type ? Color.cbAccent : Color.clear)
+                        .background(matchType == type ? Color.bcAccent : Color.clear)
                 }
             }
         }
-        .background(Color.cbCard)
-        .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
-        .overlay(RoundedRectangle(cornerRadius: CBRadius.card).stroke(Color.cbBorder, lineWidth: 1))
+        .background(Color.bcCard)
+        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
     }
 
     // MARK: - Step 2: Lineup
@@ -181,11 +181,11 @@ struct SetupView: View {
             playerCard(side: .home)
             Text("VS")
                 .font(.system(size: 10, weight: .black))
-                .foregroundStyle(Color.cbMuted)
+                .foregroundStyle(Color.bcMuted)
                 .padding(.horizontal, 10).padding(.vertical, 4)
-                .background(Color.cbCard)
-                .clipShape(RoundedRectangle(cornerRadius: CBRadius.vsPill))
-                .overlay(RoundedRectangle(cornerRadius: CBRadius.vsPill).stroke(Color.cbBorder, lineWidth: 1))
+                .background(Color.bcCard)
+                .clipShape(RoundedRectangle(cornerRadius: BCRadius.vsPill))
+                .overlay(RoundedRectangle(cornerRadius: BCRadius.vsPill).stroke(Color.bcBorder, lineWidth: 1))
             playerCard(side: .away)
         }
     }
@@ -206,21 +206,21 @@ struct SetupView: View {
                           text: isHome ? $homePlayer2 : $awayPlayer2)
             }
         }
-        .padding(CBLayout.intraStepSpacing)
+        .padding(BCLayout.intraStepSpacing)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.cbCard)
-        .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
+        .background(Color.bcCard)
+        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
         .overlay(alignment: .leading) {
             if accentEdge {
-                RoundedRectangle(cornerRadius: CBRadius.card)
-                    .fill(Color.cbAccent)
+                RoundedRectangle(cornerRadius: BCRadius.card)
+                    .fill(Color.bcAccent)
                     .frame(width: 4)
             }
         }
         .overlay {
             if !accentEdge {
-                RoundedRectangle(cornerRadius: CBRadius.card)
-                    .stroke(Color.cbBorder, lineWidth: 1)
+                RoundedRectangle(cornerRadius: BCRadius.card)
+                    .stroke(Color.bcBorder, lineWidth: 1)
             }
         }
     }
@@ -230,7 +230,7 @@ struct SetupView: View {
             .font(.system(size: 24, weight: .black))
             .textCase(.uppercase)
             .foregroundStyle(Color.white)
-            .tint(Color.cbAccent)
+            .tint(Color.bcAccent)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.characters)
     }
@@ -260,8 +260,8 @@ struct SetupView: View {
                 Text("Coin Toss").cardLabelStyle(accent: true)
             }
             .padding(.horizontal, 10).padding(.vertical, 5)
-            .background(Color.cbAccentDim)
-            .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
+            .background(Color.bcAccentDim)
+            .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
         }
         .disabled(isFlipping)
     }
@@ -285,18 +285,18 @@ struct SetupView: View {
             VStack(spacing: 8) {
                 Image(systemName: "person")
                     .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(selected ? Color.cbAccent : Color.cbMuted)
+                    .foregroundStyle(selected ? Color.bcAccent : Color.bcMuted)
                 Text(name.isEmpty ? (side == .home ? "HOME" : "AWAY") : name)
                     .optionTitleStyle()
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
-            .background(selected ? Color.cbCardActive : Color.cbCard)
-            .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
+            .background(selected ? Color.bcCardActive : Color.bcCard)
+            .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
             .overlay(
-                RoundedRectangle(cornerRadius: CBRadius.card)
-                    .stroke(selected ? Color.cbAccent : Color.cbBorder, lineWidth: selected ? 1.5 : 1)
+                RoundedRectangle(cornerRadius: BCRadius.card)
+                    .stroke(selected ? Color.bcAccent : Color.bcBorder, lineWidth: selected ? 1.5 : 1)
             )
         }
     }
@@ -324,10 +324,10 @@ struct SetupView: View {
                         Text("Super tiebreak instead of final set").optionSubtitleStyle()
                     }
                 }
-                .tint(Color.cbAccent)
-                .padding(CBLayout.intraStepSpacing)
-                .background(Color.cbCard)
-                .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
+                .tint(Color.bcAccent)
+                .padding(BCLayout.intraStepSpacing)
+                .background(Color.bcCard)
+                .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
                 .transition(.opacity)
             }
         }
@@ -344,27 +344,27 @@ struct SetupView: View {
                 Text(p.subtitle).optionSubtitleStyle()
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(CBLayout.intraStepSpacing)
-            .background(selected ? Color.cbCardActive : Color.cbCard)
-            .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
+            .padding(BCLayout.intraStepSpacing)
+            .background(selected ? Color.bcCardActive : Color.bcCard)
+            .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
             .overlay(
-                RoundedRectangle(cornerRadius: CBRadius.card)
-                    .stroke(selected ? Color.cbAccent : Color.cbBorder, lineWidth: selected ? 1.5 : 1)
+                RoundedRectangle(cornerRadius: BCRadius.card)
+                    .stroke(selected ? Color.bcAccent : Color.bcBorder, lineWidth: selected ? 1.5 : 1)
             )
         }
     }
 
     private var customPanel: some View {
         VStack(spacing: 0) {
-            Divider().background(Color.cbCustomBorder)
-            VStack(spacing: CBLayout.intraStepSpacing) {
+            Divider().background(Color.bcCustomBorder)
+            VStack(spacing: BCLayout.intraStepSpacing) {
                 stepperRow(
                     label: "Games Per Set",
                     subtitle: "Standard is 6",
                     value: $customGames,
                     range: 1...20
                 )
-                Divider().background(Color.cbBorder)
+                Divider().background(Color.bcBorder)
                 stepperRow(
                     label: "Tiebreak At",
                     subtitle: "\(customTiebreak)–\(customTiebreak)",
@@ -372,10 +372,10 @@ struct SetupView: View {
                     range: 1...customGames
                 )
             }
-            .padding(CBLayout.intraStepSpacing)
+            .padding(BCLayout.intraStepSpacing)
         }
-        .background(Color.cbCard)
-        .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
+        .background(Color.bcCard)
+        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
         .onChange(of: customGames) { _, new in
             customTiebreak = min(customTiebreak, new)
         }
@@ -399,8 +399,8 @@ struct SetupView: View {
                     Text("–").font(.system(size: 16, weight: .black))
                         .foregroundStyle(Color.white)
                         .frame(width: 36, height: 36)
-                        .background(Color.cbStepper)
-                        .clipShape(RoundedRectangle(cornerRadius: CBRadius.stepper))
+                        .background(Color.bcStepper)
+                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.stepper))
                 }
 
                 Text("\(value.wrappedValue)")
@@ -415,8 +415,8 @@ struct SetupView: View {
                     Text("+").font(.system(size: 16, weight: .black))
                         .foregroundStyle(Color.black)
                         .frame(width: 36, height: 36)
-                        .background(Color.cbAccent)
-                        .clipShape(RoundedRectangle(cornerRadius: CBRadius.stepper))
+                        .background(Color.bcAccent)
+                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.stepper))
                 }
             }
         }
@@ -426,7 +426,7 @@ struct SetupView: View {
 
     private var summaryBar: some View {
         VStack(spacing: 0) {
-            Divider().background(Color.cbBorder)
+            Divider().background(Color.bcBorder)
 
             VStack(spacing: 12) {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -438,12 +438,12 @@ struct SetupView: View {
                     Text("Start Match").primaryButtonStyle()
                         .frame(maxWidth: .infinity)
                         .frame(height: 64)
-                        .background(canStart ? Color.cbAccent : Color.cbBorder)
-                        .clipShape(RoundedRectangle(cornerRadius: CBRadius.button))
+                        .background(canStart ? Color.bcAccent : Color.bcBorder)
+                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
                 }
                 .disabled(!canStart)
             }
-            .padding(.horizontal, CBLayout.horizontalMargin)
+            .padding(.horizontal, BCLayout.horizontalMargin)
             .padding(.vertical, 16)
             .background(.ultraThinMaterial.opacity(0.95))
         }
@@ -471,6 +471,6 @@ private extension View {
     func segmentStyle(selected: Bool) -> some View {
         self.font(.system(size: 14, weight: .bold))
             .textCase(.uppercase)
-            .foregroundStyle(selected ? Color.black : Color.cbMuted)
+            .foregroundStyle(selected ? Color.black : Color.bcMuted)
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// Match history list — the main screen of CourtBoard.
+/// Match history list — the main screen of BagelCourt.
 struct HistoryView: View {
     var onNewMatch: (Match) -> Void
     var onResumeMatch: (LiveMatchController) -> Void
@@ -13,7 +13,7 @@ struct HistoryView: View {
 
     var body: some View {
         ZStack {
-            Color.cbBg.ignoresSafeArea()
+            Color.bcBg.ignoresSafeArea()
 
             if records.isEmpty {
                 emptyState
@@ -21,8 +21,8 @@ struct HistoryView: View {
                 List {
                     ForEach(records) { record in
                         matchRow(record)
-                            .listRowBackground(Color.cbCard)
-                            .listRowSeparatorTint(Color.cbBorder)
+                            .listRowBackground(Color.bcCard)
+                            .listRowSeparatorTint(Color.bcBorder)
                     }
                     .onDelete(perform: deleteRecords)
                 }
@@ -34,8 +34,8 @@ struct HistoryView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 HStack(spacing: 6) {
-                    Image(systemName: "tennisball").foregroundStyle(Color.cbAccent)
-                    Text("COURT BOARD").wordmarkStyle()
+                    Image(systemName: "tennisball").foregroundStyle(Color.bcAccent)
+                    Text("BAGEL COURT").wordmarkStyle()
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -44,7 +44,7 @@ struct HistoryView: View {
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color.cbAccent)
+                        .foregroundStyle(Color.bcAccent)
                 }
             }
         }
@@ -103,7 +103,7 @@ struct HistoryView: View {
                         .foregroundStyle(Color.white)
                     Text("VS")
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(Color.cbMuted)
+                        .foregroundStyle(Color.bcMuted)
                     Text(record.awayDisplayName.uppercased())
                         .font(.system(size: 13, weight: .black))
                         .foregroundStyle(Color.white)
@@ -111,7 +111,7 @@ struct HistoryView: View {
 
                 HStack(spacing: 8) {
                     Text(record.formatLabel).cardLabelStyle()
-                    Text("•").foregroundStyle(Color.cbBorder)
+                    Text("•").foregroundStyle(Color.bcBorder)
                     Text(record.startDate.formatted(date: .abbreviated, time: .omitted))
                         .cardLabelStyle()
                 }
@@ -124,13 +124,13 @@ struct HistoryView: View {
                     .font(.system(size: 8, weight: .black))
                     .foregroundStyle(Color.black)
                     .padding(.horizontal, 6).padding(.vertical, 3)
-                    .background(Color.cbAccent)
+                    .background(Color.bcAccent)
                     .clipShape(Capsule())
             } else if let m = record.decoded, let w = m.winner {
                 let winName = w == .home ? m.homeDisplayName : m.awayDisplayName
                 Text(winName.uppercased())
                     .font(.system(size: 9, weight: .black))
-                    .foregroundStyle(Color.cbAccent)
+                    .foregroundStyle(Color.bcAccent)
                     .lineLimit(1)
             }
         }
@@ -144,7 +144,7 @@ struct HistoryView: View {
             Spacer()
             Image(systemName: "tennisball")
                 .font(.system(size: 56, weight: .black))
-                .foregroundStyle(Color.cbAccent.opacity(0.3))
+                .foregroundStyle(Color.bcAccent.opacity(0.3))
             VStack(spacing: 8) {
                 Text("No matches yet").optionTitleStyle()
                 Text("Tap + to start your first match").optionSubtitleStyle()
@@ -155,10 +155,10 @@ struct HistoryView: View {
             } label: {
                 Text("New Match").primaryButtonStyle()
                     .frame(maxWidth: .infinity).frame(height: 64)
-                    .background(Color.cbAccent)
-                    .clipShape(RoundedRectangle(cornerRadius: CBRadius.button))
+                    .background(Color.bcAccent)
+                    .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
             }
-            .padding(.horizontal, CBLayout.horizontalMargin)
+            .padding(.horizontal, BCLayout.horizontalMargin)
             .padding(.bottom, 48)
         }
     }

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct CourtBoardApp: App {
+struct BagelCourtApp: App {
     init() {
         WatchBridge.shared.activate()
     }

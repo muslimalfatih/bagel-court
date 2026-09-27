@@ -9,19 +9,19 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.cbBg.ignoresSafeArea()
+                Color.bcBg.ignoresSafeArea()
 
                 List {
                     Section {
-                        aboutRow(icon: "tennisball", title: "CourtBoard",
+                        aboutRow(icon: "tennisball", title: "BagelCourt",
                                  subtitle: "Live tennis scoring for iPhone and Apple Watch")
                         aboutRow(icon: "number", title: "Version",
                                  subtitle: "\(appVersion) (\(buildNumber))")
                     } header: {
                         Text("About").stepLabelStyle().textCase(nil)
                     }
-                    .listRowBackground(Color.cbCard)
-                    .listRowSeparatorTint(Color.cbBorder)
+                    .listRowBackground(Color.bcCard)
+                    .listRowSeparatorTint(Color.bcBorder)
                 }
                 .scrollContentBackground(.hidden)
                 .listStyle(.insetGrouped)
@@ -33,7 +33,7 @@ struct SettingsView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
-                        .foregroundStyle(Color.cbAccent)
+                        .foregroundStyle(Color.bcAccent)
                         .font(.system(size: 14, weight: .bold))
                 }
             }
@@ -45,7 +45,7 @@ struct SettingsView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Color.cbAccent)
+                .foregroundStyle(Color.bcAccent)
                 .frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).optionTitleStyle()

@@ -4,7 +4,7 @@ struct MatchSetupView: View {
     @Binding var activeMatch: TennisMatch?
     @State private var player1Name = ""
     @State private var player2Name = ""
-    @State private var format: MatchFormat = .bestOf3
+    @State private var format: LegacyMatchFormat = .bestOf3
     @State private var firstServer = 1
     @Environment(\.dismiss) var dismiss
 
@@ -55,7 +55,7 @@ struct MatchSetupView: View {
         VStack(alignment: .leading, spacing: 12) {
             sectionHeader("MATCH FORMAT")
             HStack(spacing: 12) {
-                ForEach(MatchFormat.allCases, id: \.self) { fmt in
+                ForEach(LegacyMatchFormat.allCases, id: \.self) { fmt in
                     Button(action: { format = fmt }) {
                         Text(fmt.rawValue)
                             .font(.subheadline.bold())

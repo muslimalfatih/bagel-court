@@ -1,6 +1,7 @@
 import Foundation
+import Combine
 
-enum MatchFormat: String, CaseIterable {
+enum LegacyMatchFormat: String, CaseIterable {
     case bestOf3 = "Best of 3"
     case bestOf5 = "Best of 5"
     var setsToWin: Int { self == .bestOf3 ? 2 : 3 }
@@ -23,7 +24,7 @@ private struct Snapshot {
 class TennisMatch: ObservableObject {
     let player1Name: String
     let player2Name: String
-    let format: MatchFormat
+    let format: LegacyMatchFormat
 
     @Published var sets: [SetScore] = [SetScore()]
     @Published var p1Points: Int = 0
@@ -34,7 +35,7 @@ class TennisMatch: ObservableObject {
 
     private var history: [Snapshot] = []
 
-    init(player1: String, player2: String, format: MatchFormat, firstServer: Int = 1) {
+    init(player1: String, player2: String, format: LegacyMatchFormat, firstServer: Int = 1) {
         self.player1Name = player1
         self.player2Name = player2
         self.format = format

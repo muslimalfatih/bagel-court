@@ -24,7 +24,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "gearshape")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(Color.cbMuted)
+                            .foregroundStyle(Color.bcMuted)
                     }
                 }
             }

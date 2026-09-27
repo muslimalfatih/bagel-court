@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import WatchConnectivity
 
@@ -31,4 +32,12 @@ final class WatchConnectivityReceiver: NSObject, ObservableObject, WCSessionDele
         else { return }
         Task { @MainActor in self.snapshot = snap }
     }
+
+#if os(iOS)
+    // Required by WCSessionDelegate on iOS but not on watchOS.
+    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
+    nonisolated func sessionDidDeactivate(_ session: WCSession) {
+        WCSession.default.activate()
+    }
+#endif
 }

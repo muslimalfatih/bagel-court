@@ -5,24 +5,25 @@ struct ResultView: View {
     let record: MatchRecord
     @State private var shareImage: UIImage? = nil
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.displayScale) private var displayScale
 
     private var match: Match? { record.decoded }
 
     var body: some View {
         ZStack {
-            Color.cbBg.ignoresSafeArea()
+            Color.bcBg.ignoresSafeArea()
 
             if let m = match {
                 ScrollView {
                     VStack(spacing: 24) {
                         scorecard(m)
-                            .padding(.horizontal, CBLayout.horizontalMargin)
+                            .padding(.horizontal, BCLayout.horizontalMargin)
 
                         metaRow(m)
-                            .padding(.horizontal, CBLayout.horizontalMargin)
+                            .padding(.horizontal, BCLayout.horizontalMargin)
 
                         shareButton(m)
-                            .padding(.horizontal, CBLayout.horizontalMargin)
+                            .padding(.horizontal, BCLayout.horizontalMargin)
 
                         Spacer(minLength: 40)
                     }
@@ -30,7 +31,7 @@ struct ResultView: View {
                 }
             } else {
                 Text("Could not load match.")
-                    .foregroundStyle(Color.cbMuted)
+                    .foregroundStyle(Color.bcMuted)
             }
         }
         .preferredColorScheme(.dark)
@@ -57,15 +58,15 @@ struct ResultView: View {
             }
             .padding(.horizontal, 16).padding(.vertical, 10)
 
-            Divider().background(Color.cbBorder)
+            Divider().background(Color.bcBorder)
 
             playerResultRow(m, side: .home, sets: sets)
-            Divider().background(Color.cbBorder.opacity(0.4))
+            Divider().background(Color.bcBorder.opacity(0.4))
             playerResultRow(m, side: .away, sets: sets)
         }
-        .background(Color.cbCard)
-        .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
-        .overlay(RoundedRectangle(cornerRadius: CBRadius.card).stroke(Color.cbBorder, lineWidth: 1))
+        .background(Color.bcCard)
+        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
     }
 
     @ViewBuilder
@@ -78,11 +79,11 @@ struct ResultView: View {
             HStack(spacing: 8) {
                 if isWinner {
                     Image(systemName: "trophy.fill")
-                        .font(.system(size: 10)).foregroundStyle(Color.cbAccent)
+                        .font(.system(size: 10)).foregroundStyle(Color.bcAccent)
                 }
                 Text(name.uppercased())
                     .font(.system(size: 14, weight: isWinner ? .black : .regular))
-                    .foregroundStyle(isWinner ? Color.white : Color.cbMuted)
+                    .foregroundStyle(isWinner ? Color.white : Color.bcMuted)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -92,7 +93,7 @@ struct ResultView: View {
                 let won = isHome ? sets[i].homeWon : sets[i].awayWon
                 Text(sets[i].isSuperTiebreak ? "[\(val)]" : "\(val)")
                     .font(.system(size: 16, weight: won ? .black : .regular))
-                    .foregroundStyle(won ? Color.cbAccent : Color.cbMuted)
+                    .foregroundStyle(won ? Color.bcAccent : Color.bcMuted)
                     .frame(width: 40)
             }
         }
@@ -113,9 +114,9 @@ struct ResultView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(16)
-        .background(Color.cbCard)
-        .clipShape(RoundedRectangle(cornerRadius: CBRadius.card))
-        .overlay(RoundedRectangle(cornerRadius: CBRadius.card).stroke(Color.cbBorder, lineWidth: 1))
+        .background(Color.bcCard)
+        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
     }
 
     private func metaItem(label: String, value: String) -> some View {
@@ -140,32 +141,32 @@ struct ResultView: View {
     @ViewBuilder
     private func shareButton(_ m: Match) -> some View {
         if let img = shareImage {
-            ShareLink(item: Image(uiImage: img), preview: SharePreview("CourtBoard Scorecard", image: Image(uiImage: img))) {
+            ShareLink(item: Image(uiImage: img), preview: SharePreview("BagelCourt Scorecard", image: Image(uiImage: img))) {
                 Text("Share Scorecard").primaryButtonStyle()
                     .frame(maxWidth: .infinity).frame(height: 64)
-                    .background(Color.cbAccent)
-                    .clipShape(RoundedRectangle(cornerRadius: CBRadius.button))
+                    .background(Color.bcAccent)
+                    .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
             }
         } else {
             Button {
-                renderScorecard(m)
+                renderScorecard(m, scale: displayScale)
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "square.and.arrow.up")
                     Text("Share Scorecard").primaryButtonStyle()
                 }
                 .frame(maxWidth: .infinity).frame(height: 64)
-                .background(Color.cbAccent)
-                .clipShape(RoundedRectangle(cornerRadius: CBRadius.button))
+                .background(Color.bcAccent)
+                .clipShape(RoundedRectangle(cornerRadius: BCRadius.button))
             }
         }
     }
 
     @MainActor
-    private func renderScorecard(_ m: Match) {
+    private func renderScorecard(_ m: Match, scale: CGFloat) {
         let card = ScorecardRenderView(match: m)
         let renderer = ImageRenderer(content: card)
-        renderer.scale = UIScreen.main.scale
+        renderer.scale = scale
         shareImage = renderer.uiImage
     }
 }
@@ -181,8 +182,8 @@ private struct ScorecardRenderView: View {
             HStack {
                 HStack(spacing: 6) {
                     Image(systemName: "tennisball")
-                        .foregroundStyle(Color.cbAccent)
-                    Text("COURT BOARD").wordmarkStyle()
+                        .foregroundStyle(Color.bcAccent)
+                    Text("BAGEL COURT").wordmarkStyle()
                 }
                 Spacer()
             }
@@ -195,14 +196,14 @@ private struct ScorecardRenderView: View {
                 HStack {
                     Text(name.uppercased())
                         .font(.system(size: 14, weight: won ? .black : .regular))
-                        .foregroundStyle(won ? Color.white : Color.cbMuted)
+                        .foregroundStyle(won ? Color.white : Color.bcMuted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     ForEach(0..<sets.count, id: \.self) { i in
                         let v = isHome ? sets[i].home : sets[i].away
                         let w2 = isHome ? sets[i].homeWon : sets[i].awayWon
                         Text("\(v)")
                             .font(.system(size: 15, weight: w2 ? .black : .regular))
-                            .foregroundStyle(w2 ? Color.cbAccent : Color.cbMuted)
+                            .foregroundStyle(w2 ? Color.bcAccent : Color.bcMuted)
                             .frame(width: 32)
                     }
                 }
@@ -213,7 +214,7 @@ private struct ScorecardRenderView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(20)
-        .background(Color.cbBg)
+        .background(Color.bcBg)
         .frame(width: 360)
     }
 }
