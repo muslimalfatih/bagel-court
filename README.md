@@ -1,206 +1,106 @@
-# BagelCourt
+<p align="center">
+  <img src="BagelCourt/Assets.xcassets/AppIcon.appiconset/AppIcon.png" width="96" alt="BagelCourt app icon">
+</p>
 
-**Live tennis scoring for iPhone, with an Apple Watch mirror.**
+<h1 align="center">BagelCourt</h1>
 
-BagelCourt keeps score so you can keep playing. Tap who won the point, and the app takes care of the rest: deuce and advantage, tiebreaks, service rotation, sets and match point. If you tap the wrong side, one undo puts it right, even across a game, set or match boundary.
+<p align="center">A tennis scorekeeper for iPhone. You tap who won the point, and the app keeps the score.</p>
 
-![Platform](https://img.shields.io/badge/platform-iOS%2026.5%2B-black)
-![Swift](https://img.shields.io/badge/Swift-5-orange)
-![UI](https://img.shields.io/badge/UI-SwiftUI-blue)
-![Persistence](https://img.shields.io/badge/storage-SwiftData-green)
+<p align="center">
+  <img src="docs/screenshots/history.png" width="200" alt="Match history">
+  <img src="docs/screenshots/setup.png" width="200" alt="Setting up a match">
+  <img src="docs/screenshots/match.png" width="200" alt="Scoring a match">
+  <img src="docs/screenshots/scorecard.png" width="200" alt="Scorecard of a finished match">
+</p>
 
-> [!NOTE]
-> BagelCourt is in early development. The iPhone app is usable today; the watchOS companion target is not yet part of the project (see [Roadmap](#roadmap)).
+BagelCourt keeps score for singles and doubles. It follows the rules for you: deuce and advantage, tiebreaks, who serves next, and when a set or the match is over. It works offline, doesn't need an account, and stores your matches on the device.
 
----
-
-## Contents
-
-- [Features](#features)
-- [Requirements](#requirements)
-- [Getting started](#getting-started)
-- [Running the tests](#running-the-tests)
-- [Architecture](#architecture)
-- [Project structure](#project-structure)
-- [Using the scoring engine](#using-the-scoring-engine)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
+The name comes from tennis slang: a bagel is a set won 6-0.
 
 ## Features
 
-- **One-tap scoring.** Score a point for either side; the display follows tennis conventions (`15–30`, `DEUCE`, `AD IN` / `AD OUT`).
-- **Complete rules engine.** Advantage scoring, tiebreaks (including extended ones like 9–7), the 1-then-2 tiebreak serve rotation, and an optional 10-point super tiebreak in place of a deciding set.
-- **Match formats.** Presets for best of 3, best of 1, pro set (8 games) and short set (4 games), plus a custom format.
-- **Singles, doubles and mixed.** The match type only changes how many names are collected; scoring is identical.
-- **Unlimited undo.** Undo works across any boundary because every score is derived from the point log.
-- **Match history.** Matches are saved on device with SwiftData. Unfinished matches can be resumed or discarded.
-- **Shareable scorecard.** Export a finished match as an image through the system share sheet.
-- **Apple Watch mirror.** The phone pushes a live score snapshot to the watch over WatchConnectivity.
+- Singles, doubles and mixed matches.
+- Best of three sets, a single set, an eight-game pro set, a four-game short set, or your own number of games per set and tiebreak score.
+- An optional 10-point match tiebreak in place of the final set in best-of-three matches.
+- A coin toss to decide who serves first.
+- Undo as many points as you like, including across games, sets and the end of the match.
+- A dot-matrix board on the match screen that shows the current game score in large type.
+- Different haptics for winning a point, a game, a set and the match.
+- Match history, with an offer to resume a match you left unfinished.
+- A scorecard for each finished match that you can share as an image.
 
 ## Requirements
 
-| Tool | Version |
-| --- | --- |
-| Xcode | 26.6 or later |
-| iOS deployment target | 26.5 |
-| Swift | 5 (Swift 6 approachable concurrency enabled, default `MainActor` isolation) |
+- Xcode 26 or later
+- iOS 26.5 or later
 
-There are no third-party dependencies. Everything is built on Apple frameworks: SwiftUI, SwiftData, WatchConnectivity and Swift Testing.
+There are no third-party dependencies.
 
 ## Getting started
 
-1. Clone the repository.
-
-   ```bash
-   git clone <repository-url> bagel-court
-   cd bagel-court
-   ```
-
-2. Open the project.
-
-   ```bash
-   open BagelCourt.xcodeproj
-   ```
-
-3. Select the **BagelCourt** scheme and an iPhone simulator, then press <kbd>⌘</kbd><kbd>R</kbd>.
-
-To run on a physical device, change the **Team** under *Signing & Capabilities* to your own. You may also need to change the bundle identifier (`com.muslimalfatih.bagelcourt`) to one your team owns.
-
-Building from the command line:
-
-```bash
-xcodebuild build \
-  -project BagelCourt.xcodeproj \
-  -scheme BagelCourt \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+```sh
+git clone https://github.com/muslimalfatih/bagel-court.git
+cd bagel-court
+open BagelCourt.xcodeproj
 ```
+
+Pick the BagelCourt scheme and an iPhone simulator, then press Cmd+R.
+
+To run it on your own iPhone, choose your team under Signing & Capabilities. If Xcode can't register the bundle identifier (`com.muslimalfatih.bagelcourt`), change it to one your team owns.
 
 ## Running the tests
 
-The scoring engine is covered by a [Swift Testing](https://developer.apple.com/documentation/testing) suite in [`BagelCourtTests/MatchEngineTests.swift`](BagelCourtTests/MatchEngineTests.swift). It covers love games, deuce and advantage, set wins, tiebreaks, serve rotation, full matches, and undo across every boundary.
+The scoring engine and the dot-matrix board have unit tests written with Swift Testing. Cmd+U in Xcode runs them along with the UI tests. From the command line:
 
-In Xcode, press <kbd>⌘</kbd><kbd>U</kbd>. From the command line:
-
-```bash
-# Unit tests only (fast)
+```sh
 xcodebuild test \
   -project BagelCourt.xcodeproj \
   -scheme BagelCourt \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -only-testing:BagelCourtTests
-
-# Everything, including UI tests
-xcodebuild test \
-  -project BagelCourt.xcodeproj \
-  -scheme BagelCourt \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
-## Architecture
+## How it works
 
-BagelCourt is split into a pure scoring engine and a thin SwiftUI app around it.
+The scoring rules are in `BagelCourt/Engine` and don't depend on SwiftUI or SwiftData. A `Match` stores its setup (players, format, first server) and the list of points in the order they were won. The score, the server, finished sets and the winner are all worked out by replaying that list through `MatchState`. Undo removes the last point and replays the rest, so it can't leave the score in a state the rules wouldn't allow.
 
-```
- ┌──────────────────────────── App (SwiftUI) ─────────────────────────────┐
- │  HistoryView ─► SetupView ─► InMatchView ─► ResultView                 │
- │                                   │                                    │
- │                         LiveMatchController                            │
- │                    (@Observable, caches MatchState)                    │
- │                      │                      │                          │
- │          MatchStore (SwiftData)     WatchBridge (WatchConnectivity)    │
- └──────────────────────┼──────────────────────┼──────────────────────────┘
-                        ▼                      ▼
- ┌──────────── Engine (pure Swift) ─────┐   Apple Watch
- │  Match ── point log ──► MatchState    │   WatchScoreView
- │  MatchFormat · GameScore · SetResult  │
- └───────────────────────────────────────┘
-```
+Matches are saved with SwiftData. Each record holds the whole `Match` as JSON, so changing the engine doesn't require a database migration.
 
-**The point log is the single source of truth.** `Match` is a value type that stores only its setup (players, format, first server) and the ordered list of points won. The current score, the server, completed sets and the winner are all derived by replaying that log through the internal `MatchState` machine. As a result:
-
-- Undo is just removing the last point, so it can't leave the score in an inconsistent state.
-- Persistence is simple: the whole `Match` is `Codable` and stored as one JSON blob in a SwiftData `MatchRecord`, so engine changes don't need schema migrations.
-- The engine has no UI or framework dependencies, which makes it easy to test.
-
-`LiveMatchController` owns the match while it is being played. It replays the log once per mutation, not once per render, and then persists the result and pushes a snapshot to the watch.
-
-## Project structure
+The screens are in `BagelCourt/App`. While a match is being played, `LiveMatchController` records each point, plays the haptic, saves the match and sends the score to the watch.
 
 ```
 BagelCourt/
-├── BagelCourtApp.swift        App entry point
-├── ContentView.swift          Root navigation and presentation
-├── App/                       Screens, design system, persistence, watch sync
-│   ├── DesignSystem.swift     Colour tokens (bc*), radii, layout, text styles
-│   ├── HistoryView.swift      Match list (home screen)
-│   ├── SetupView.swift        New match setup
-│   ├── InMatchView.swift      Live scoring screen
-│   ├── ResultView.swift       Final score and shareable scorecard
-│   ├── SettingsView.swift
-│   ├── LiveMatchController.swift
-│   ├── MatchStore.swift       SwiftData model
-│   └── WatchBridge.swift      Phone → watch channel
-├── Engine/                    Pure scoring engine (no UI dependencies)
-│   ├── Match.swift            Public API; the point log
-│   ├── MatchState.swift       Replay state machine (internal)
-│   ├── MatchFormat.swift      Rules and presets
-│   ├── GameScore.swift        Game score and display strings
-│   ├── SetResult.swift
-│   ├── MatchType.swift
-│   └── Side.swift
-├── Watch/                     watchOS views (for the future watch target)
-└── Assets.xcassets
-BagelCourtTests/               Engine unit tests (Swift Testing)
-BagelCourtUITests/             UI and launch tests (XCTest)
+├── App/        screens, design system, persistence, watch bridge
+├── Engine/     scoring rules
+├── Watch/      watchOS views (no watchOS target yet)
+└── Fonts/      bundled fonts and their licenses
+BagelCourtTests/     unit tests (Swift Testing)
+BagelCourtUITests/   UI tests (XCTest)
 ```
 
-## Using the scoring engine
+## Fonts
 
-The engine can be used on its own:
+Titles use Instrument Serif. Labels and numbers use Geist Mono. Both are licensed under the SIL Open Font License 1.1, and their license files are in `BagelCourt/Fonts`. Everything else uses the system font.
 
-```swift
-var match = Match(homePlayer: "Alex", awayPlayer: "Maria",
-                  format: .bestOf3, initialServer: .home)
+## Not done yet
 
-match.score(point: .home)   // Alex wins the point: 15–0
-match.score(point: .away)   // 15–15
-match.undoLastPoint()       // back to 15–0
-```
-
-Custom rules are a single value:
-
-```swift
-// Best of 3, deciding set replaced by a 10-point super tiebreak
-let format = MatchFormat(bestOf: 3, gamesPerSet: 6, tiebreakAt: 6,
-                         decidingSetTiebreak: true)
-```
-
-`MatchFormat` clamps invalid input (for example, an even `bestOf` or a tiebreak threshold above the games per set), so any value you build produces a playable match.
-
-## Roadmap
-
-- [ ] watchOS app target that hosts `WatchScoreView` and `WatchConnectivityReceiver`
-- [ ] Score points from the watch (currently phone → watch only)
-- [ ] App icon
-- [ ] Remove the legacy prototype files (`TennisMatch.swift`, `LiveScoreView.swift`, `MatchSetupView.swift`) once nothing depends on them
-- [ ] No-ad scoring option
+- A watchOS target. The phone already sends score updates over WatchConnectivity, and the watch views are in `BagelCourt/Watch`, but nothing builds them yet.
+- Scoring from the watch.
+- No-ad scoring.
+- Removing the early prototype files (`TennisMatch.swift`, `LiveScoreView.swift` and `MatchSetupView.swift`), which the app no longer uses.
 
 ## Contributing
 
-Contributions are welcome. To keep things smooth:
+Issues and pull requests are welcome. For anything larger than a small fix, please open an issue first so we can agree on the approach.
 
-1. **Open an issue first** for anything larger than a small fix, so the approach can be agreed before you write code.
-2. **Keep engine changes tested.** Any change to scoring rules needs a test in `MatchEngineTests.swift` that fails without the change.
-3. **Keep the engine pure.** Files in `Engine/` must not import SwiftUI, SwiftData or other app frameworks.
-4. **Run the tests** (`⌘U`) before opening a pull request, and describe what you changed and why.
+A few guidelines:
 
-Bug reports are most useful with the match format, the sequence of points, and the score you expected versus the score you saw.
+- Changes to the scoring rules need a test in `BagelCourtTests/MatchEngineTests.swift` that fails without the change.
+- Code in `Engine/` shouldn't import SwiftUI or SwiftData.
+- Run the tests before opening a pull request.
+
+Bug reports are easiest to act on when they include the match format, the points played and the score you expected to see.
 
 ## License
 
-No license has been chosen yet. Until one is added, all rights are reserved by the author. If you would like to use this code, please open an issue.
-
----
-
-Made by Muslim Alfatih.
+BagelCourt is released under the MIT License. See [LICENSE](LICENSE). The bundled fonts are covered by their own license, the SIL Open Font License 1.1.
