@@ -38,7 +38,8 @@ struct ResultView: View {
             if let img = shareImage {
                 ToolbarItem(placement: .topBarTrailing) {
                     ShareLink(item: Image(uiImage: img),
-                              preview: SharePreview("BagelCourt Scorecard", image: Image(uiImage: img)))
+                              // The share sheet crops its thumbnail square; the wide scorecard came out as "…elCourt".
+                              preview: SharePreview("BagelCourt Scorecard", image: Image(.brandMark)))
                         .accessibilityLabel("Share scorecard")
                 }
             }

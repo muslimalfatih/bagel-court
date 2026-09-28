@@ -134,7 +134,7 @@ struct InMatchView: View {
                 if serving {
                     Image(systemName: "tennisball.fill")
                         .font(.system(size: 8))
-                        .foregroundStyle(Color.bcText)
+                        .foregroundStyle(Color.bcAccent)
                 } else {
                     Spacer().frame(width: 12)
                 }
@@ -212,7 +212,7 @@ struct InMatchView: View {
                     if serving {
                         Image(systemName: "tennisball.fill")
                             .font(.system(size: 12))
-                            .foregroundStyle(Color.bcText)
+                            .foregroundStyle(Color.bcAccent)
                     }
                     Text(name)
                         .playerNameStyle()
