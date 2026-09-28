@@ -161,15 +161,15 @@ struct MatchState {
     private mutating func checkSetOver() {
         let h = currentSetHome, a = currentSetAway
 
-        // Reached tiebreakAt–tiebreakAt → enter the regular tiebreak.
-        if h == format.tiebreakAt && a == format.tiebreakAt {
+        // Games-all at the threshold (6–6 in a set to 6) → enter the regular tiebreak.
+        if h == format.tiebreakThreshold && a == format.tiebreakThreshold {
             isInTiebreak    = true
             tiebreakFirstServer = server
             return
         }
 
         // Check if someone won the set.
-        let post = format.tiebreakAt + 1          // game count after winning a tiebreak (e.g. 7)
+        let post = format.tiebreakThreshold + 1   // game count after winning a tiebreak (e.g. 7)
         let setOver = (h >= format.gamesPerSet && h - a >= 2)
                    || (a >= format.gamesPerSet && a - h >= 2)
                    || h == post || a == post

@@ -156,7 +156,7 @@ struct EditMatchView: View {
     private func setCard(_ set: Binding<SetScore>) -> some View {
         // In a deciding-set-tiebreak format the last set is a 10-point tiebreak, scored in points.
         let isMatchTiebreak = format.decidingSetTiebreak && set.wrappedValue.id == format.bestOf
-        let range = isMatchTiebreak ? 0...99 : 0...max(format.gamesPerSet, format.tiebreakAt + 1)
+        let range = isMatchTiebreak ? 0...99 : 0...(format.tiebreakThreshold + 1)   // 7 at most in a set to 6
         let home = LineupFields.teamName(names[0], names[1], isDoubles: isDoubles, fallback: "Home")
         let away = LineupFields.teamName(names[2], names[3], isDoubles: isDoubles, fallback: "Away")
 

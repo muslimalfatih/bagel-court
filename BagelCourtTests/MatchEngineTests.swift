@@ -95,7 +95,7 @@ struct MatchEngineTests {
 
     @Test("No-ad: 40–40 still shows, then the next point wins the game", arguments: Side.allCases)
     func noAdDecidingPoint(winner: Side) {
-        var m = makeMatch(format: MatchFormat(bestOf: 3, gamesPerSet: 6, tiebreakAt: 6, noAdScoring: true))
+        var m = makeMatch(format: MatchFormat(bestOf: 3, gamesPerSet: 6, noAdScoring: true))
         m.home(3); m.away(3)
         #expect(m.currentGameScore == .deuce)
         #expect(m.currentGameScore.homeLabel(server: .home) == "40")
@@ -118,7 +118,7 @@ struct MatchEngineTests {
 
     @Test("No-ad leaves tiebreaks win-by-two")
     func noAdTiebreakStillWinByTwo() {
-        var m = makeMatch(format: MatchFormat(bestOf: 3, gamesPerSet: 6, tiebreakAt: 6, noAdScoring: true))
+        var m = makeMatch(format: MatchFormat(bestOf: 3, gamesPerSet: 6, noAdScoring: true))
         for _ in 0..<6 { m.winGame(for: .home); m.winGame(for: .away) }   // 6–6 → tiebreak
 
         m.interleaved(home: 6, away: 6)
@@ -133,7 +133,7 @@ struct MatchEngineTests {
     func formatDecodesWithoutNoAdKey() throws {
         let saved = #"{"bestOf":3,"gamesPerSet":6,"tiebreakAt":6,"decidingSetTiebreak":false}"#
         let format = try JSONDecoder().decode(MatchFormat.self, from: Data(saved.utf8))
-        #expect(format == .bestOf3)   // noAdScoring defaults to false
+        #expect(format == .bestOf3)   // noAdScoring defaults to false; the old tiebreakAt key is ignored
     }
 
     // MARK: 3a. 6–4 set
@@ -174,6 +174,15 @@ struct MatchEngineTests {
         #expect(m.isInTiebreak)
         #expect(!m.isSuperTiebreak)
         #expect(m.currentGameScore == .tiebreak(home: 0, away: 0))
+    }
+
+    @Test("The tiebreak follows the games per set: a custom set to 5 goes to one at 5–5")
+    func tiebreakFollowsGamesPerSet() {
+        var m = makeMatch(format: MatchFormat(bestOf: 1, gamesPerSet: 5))
+        for _ in 0..<4 { m.winGame(for: .home); m.winGame(for: .away) }   // 4–4: no tiebreak yet
+        #expect(!m.isInTiebreak)
+        m.winGame(for: .home); m.winGame(for: .away)                       // 5–5
+        #expect(m.isInTiebreak)
     }
 
     // MARK: 4a. Tiebreak won 7–5
@@ -386,7 +395,7 @@ struct MatchEngineTests {
 
     @Test("A corrected match tiebreak is scored in points")
     func correctedMatchTiebreak() throws {
-        let format = MatchFormat(bestOf: 3, gamesPerSet: 6, tiebreakAt: 6, decidingSetTiebreak: true)
+        let format = MatchFormat(bestOf: 3, gamesPerSet: 6, decidingSetTiebreak: true)
         let sets = [SetResult(home: 6, away: 4), SetResult(home: 4, away: 6), SetResult(home: 10, away: 12)]
         let m = try #require(makeMatch(format: format).withFinalScore(sets))
         #expect(m.winner == .away)

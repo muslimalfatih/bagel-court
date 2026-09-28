@@ -101,6 +101,8 @@ extension View {
     func playerNameStyle() -> some View { modifier(PlayerNameModifier()) }
     func optionTitleStyle() -> some View { modifier(OptionTitleModifier()) }
     func optionSubtitleStyle() -> some View { modifier(LabelModifier(color: .bcMuted, size: 10)) }
+    /// Third tier under an option's title and subtitle: a plain sentence, quieter than the capitals above it.
+    func optionDetailStyle() -> some View { font(.caption2).foregroundStyle(Color.bcMuted) }
     func summaryBarStyle(accent: Bool = false) -> some View { modifier(LabelModifier(color: accent ? .bcAccent : .bcMuted)) }
 }
 

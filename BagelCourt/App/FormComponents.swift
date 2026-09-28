@@ -122,10 +122,11 @@ struct StepperRow: View {
     private func increment() { if value < range.upperBound { value += 1 } }
 }
 
-/// A rule switch with a one-line explanation.
+/// A rule switch: title, a short capitalised summary and, optionally, a sentence explaining it.
 struct RuleToggle: View {
     let title: String
     let subtitle: String
+    var detail: String? = nil
     @Binding var isOn: Bool
 
     var body: some View {
@@ -133,6 +134,7 @@ struct RuleToggle: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).optionTitleStyle()
                 Text(subtitle).optionSubtitleStyle()
+                if let detail { Text(detail).optionDetailStyle().padding(.top, 2) }
             }
         }
         .padding(BCLayout.intraStepSpacing)
@@ -140,11 +142,15 @@ struct RuleToggle: View {
     }
 
     static func noAdScoring(isOn: Binding<Bool>) -> RuleToggle {
-        RuleToggle(title: "No-Ad Scoring", subtitle: "Sudden death at deuce — no advantage needed", isOn: isOn)
+        RuleToggle(title: "No-Ad Scoring", subtitle: "Sudden death at deuce — no advantage needed",
+                   detail: "At 40-40, the next point wins the game outright. No back-and-forth.",
+                   isOn: isOn)
     }
 
     static func decidingSetTiebreak(isOn: Binding<Bool>) -> RuleToggle {
-        RuleToggle(title: "Deciding set tiebreak", subtitle: "Super tiebreak instead of final set", isOn: isOn)
+        RuleToggle(title: "Deciding Set Tiebreak", subtitle: "Super tiebreak instead of final set",
+                   detail: "If the match reaches a final set, play a 10-point tiebreak instead of a full set. Keeps close matches from running too long.",
+                   isOn: isOn)
     }
 }
 
