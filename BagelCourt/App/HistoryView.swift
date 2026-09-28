@@ -164,28 +164,20 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func rowContent(_ record: MatchRecord) -> some View {
+        let winner = record.isCompleted ? record.decoded?.winner : nil
+
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    Text(record.homeDisplayName)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color.bcText)
-                    Text("vs").cardLabelStyle()
-                    Text(record.awayDisplayName)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color.bcText)
-                }
-                .lineLimit(1)
+                // One text, so long doubles names wrap together instead of each truncating on its own.
+                let vs = Text(" vs ").font(.bcMono(11, .medium)).tracking(0.88).foregroundStyle(Color.bcMuted)
+                Text("\(teamName(record.homeDisplayName, won: winner == .home))\(vs)\(teamName(record.awayDisplayName, won: winner == .away))")
+                    .lineLimit(2)
 
-                HStack(spacing: 8) {
-                    Text(record.formatLabel).cardLabelStyle()
-                    Text("·").foregroundStyle(Color.bcMuted)
-                    Text(record.startDate.formatted(date: .abbreviated, time: .omitted))
-                        .cardLabelStyle()
-                }
+                // Also one text: format and date wrap as a line, never column by column.
+                Text("\(record.formatLabel) · \(record.startDate.formatted(date: .abbreviated, time: .omitted))")
+                    .cardLabelStyle()
             }
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             if !record.isCompleted {
                 // The web's LIVE pill: gold outline with a dot.
@@ -195,13 +187,19 @@ struct HistoryView: View {
                 }
                 .padding(.horizontal, 8).padding(.vertical, 4)
                 .overlay(Capsule().stroke(Color.bcAccent, lineWidth: 1))
-            } else if let m = record.decoded, let w = m.winner {
-                Text(w == .home ? m.homeDisplayName : m.awayDisplayName)
-                    .cardLabelStyle(accent: true)
-                    .lineLimit(1)
+                .fixedSize()
             }
         }
         .padding(.vertical, 6)
+    }
+
+    /// A player or pair in a row title. The winner is gold with a trophy, as on the scorecard,
+    /// so the row doesn't repeat the winner's name in a column of its own.
+    private func teamName(_ name: String, won: Bool) -> Text {
+        let text = Text(name).font(.system(size: 16, weight: .semibold))
+        guard won else { return text.foregroundStyle(Color.bcText) }
+        let trophy = Text(Image(systemName: "trophy.fill")).font(.system(size: 12))
+        return Text("\(trophy)\u{00A0}\(text)").foregroundStyle(Color.bcAccent)   // no-break: the trophy stays with the name
     }
 
     // MARK: - Empty state
