@@ -28,12 +28,13 @@ struct SettingsView: View {
             }
             .navigationTitle("")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Text("Settings").titleStyle()
-                        .fixedSize()
-                        .accessibilityAddTraits(.isHeader)
+                // No glass capsule behind the title on iOS 26; iOS 18 has none to hide.
+                if #available(iOS 26, *) {
+                    ToolbarItem(placement: .topBarLeading) { title }
+                        .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .topBarLeading) { title }
                 }
-                .sharedBackgroundVisibility(.hidden)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                         .foregroundStyle(Color.bcAccent)
@@ -42,6 +43,12 @@ struct SettingsView: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+
+    private var title: some View {
+        Text("Settings").titleStyle()
+            .fixedSize()
+            .accessibilityAddTraits(.isHeader)
     }
 
     private func aboutRow(icon: String, title: String, subtitle: String) -> some View {

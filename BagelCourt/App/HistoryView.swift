@@ -54,53 +54,51 @@ struct HistoryView: View {
             }
         }
         .navigationTitle("")
+        // The glass capsules and the sheets growing out of their buttons are iOS 26 only. iOS 18
+        // gets a standard toolbar and sheets that slide up.
         .toolbar {
             // The wordmark is a title, not a control: no glass capsule, which also squeezed it to one letter.
-            ToolbarItem(placement: .topBarLeading) {
-                HStack(spacing: 8) {
-                    Image(systemName: "tennisball").foregroundStyle(Color.bcAccent)
-                        .accessibilityHidden(true)
-                    Text("BagelCourt").wordmarkStyle()
-                        .accessibilityAddTraits(.isHeader)
-                }
-                .fixedSize()
+            if #available(iOS 26, *) {
+                ToolbarItem(placement: .topBarLeading) { wordmark }
+                    .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .topBarLeading) { wordmark }
             }
-            .sharedBackgroundVisibility(.hidden)
             // Both trailing buttons live in this one toolbar: split across two views' toolbars,
             // their zoom sources got crossed and the gear opened Setup.
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingSettings = true
-                } label: {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color.bcMuted)
-                }
-                .accessibilityLabel("Settings")
+            if #available(iOS 26, *) {
+                ToolbarItem(placement: .navigationBarTrailing) { settingsButton }
+                    .matchedTransitionSource(id: "settings", in: transitions)
+            } else {
+                ToolbarItem(placement: .navigationBarTrailing) { settingsButton }
             }
-            .matchedTransitionSource(id: "settings", in: transitions)
             // Separate glass capsules, so each sheet morphs out of its own button, not a shared pill.
-            ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    openSetup(from: "plus")
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color.bcAccent)
-                }
-                .accessibilityLabel("New match")
+            if #available(iOS 26, *) {
+                ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
             }
-            .matchedTransitionSource(id: "plus", in: transitions)
+            if #available(iOS 26, *) {
+                ToolbarItem(placement: .navigationBarTrailing) { newMatchButton }
+                    .matchedTransitionSource(id: "plus", in: transitions)
+            } else {
+                ToolbarItem(placement: .navigationBarTrailing) { newMatchButton }
+            }
         }
         .sheet(isPresented: $showingSetup) {
             // Closing Setup also closes the match presented over it, so it slides away in one motion.
-            SetupView { showingSetup = false }
-                .navigationTransition(.zoom(sourceID: setupSource, in: transitions))
+            if #available(iOS 26, *) {
+                SetupView { showingSetup = false }
+                    .navigationTransition(.zoom(sourceID: setupSource, in: transitions))
+            } else {
+                SetupView { showingSetup = false }
+            }
         }
         .sheet(isPresented: $showingSettings) {
-            SettingsView()
-                .navigationTransition(.zoom(sourceID: "settings", in: transitions))
+            if #available(iOS 26, *) {
+                SettingsView()
+                    .navigationTransition(.zoom(sourceID: "settings", in: transitions))
+            } else {
+                SettingsView()
+            }
         }
         .sheet(item: $recordToEdit) { record in
             if let match = record.decoded {
@@ -137,6 +135,40 @@ struct HistoryView: View {
             }
         }
         .onAppear { checkForIncompleteMatch() }
+    }
+
+    // MARK: - Toolbar items
+
+    private var wordmark: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "tennisball").foregroundStyle(Color.bcAccent)
+                .accessibilityHidden(true)
+            Text("BagelCourt").wordmarkStyle()
+                .accessibilityAddTraits(.isHeader)
+        }
+        .fixedSize()
+    }
+
+    private var settingsButton: some View {
+        Button {
+            showingSettings = true
+        } label: {
+            Image(systemName: "gearshape")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(Color.bcMuted)
+        }
+        .accessibilityLabel("Settings")
+    }
+
+    private var newMatchButton: some View {
+        Button {
+            openSetup(from: "plus")
+        } label: {
+            Image(systemName: "plus")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(Color.bcAccent)
+        }
+        .accessibilityLabel("New match")
     }
 
     private func openSetup(from source: String) {
