@@ -38,6 +38,15 @@ final class MatchRecord {
         if match.isOver && endDate == nil { endDate = Date() }
     }
 
+    /// Saves a correction made in Edit Match. A new start date moves the end date by the same
+    /// amount, so the match keeps its duration.
+    func applyEdit(_ match: Match) throws {
+        let shift = match.startDate.timeIntervalSince(startDate)
+        try update(with: match)
+        startDate = match.startDate
+        endDate   = endDate?.addingTimeInterval(shift)
+    }
+
     /// Decode the stored match. Returns nil if the data is corrupt.
     var decoded: Match? {
         try? JSONDecoder().decode(Match.self, from: matchData)
@@ -48,17 +57,8 @@ final class MatchRecord {
 
 extension MatchFormat {
     /// "Best of 3", "Pro Set" and so on, plus " · No-Ad" when that rule is on.
-    /// Named by sets, games and tiebreak only: comparing whole formats labelled a best of 3
-    /// with a deciding-set tiebreak (or any no-ad match) as "Custom".
     var displayLabel: String {
-        let name: String
-        switch (bestOf, gamesPerSet, tiebreakAt) {
-        case (3, 6, 6): name = "Best of 3"
-        case (1, 6, 6): name = "Best of 1"
-        case (1, 8, 8): name = "Pro Set"
-        case (1, 4, 4): name = "Short Set"
-        default:        name = "Custom"
-        }
+        let name = FormatPreset(self).rawValue
         return noAdScoring ? name + " · No-Ad" : name
     }
 }

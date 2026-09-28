@@ -145,6 +145,15 @@ enum BCRadius {
     static let control: CGFloat = 12   // inputs, steppers and other small controls; pills use Capsule
 }
 
+extension View {
+    /// A card: surface fill, card corners and a hairline border.
+    func cardSurface() -> some View {
+        background(Color.bcCard)
+            .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+            .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
+    }
+}
+
 // MARK: - Layout constants
 
 enum BCLayout {

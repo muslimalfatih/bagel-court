@@ -31,6 +31,14 @@ enum FormatPreset: String, CaseIterable, Identifiable {
         case .custom:    return .custom
         }
     }
+
+    /// The preset a saved format was made from, by sets, games and tiebreak; anything else is Custom.
+    init(_ format: MatchFormat) {
+        self = Self.allCases.first {
+            let b = $0.baseFormat
+            return (b.bestOf, b.gamesPerSet, b.tiebreakAt) == (format.bestOf, format.gamesPerSet, format.tiebreakAt)
+        } ?? .custom
+    }
 }
 
 // MARK: - SetupView
@@ -80,14 +88,8 @@ struct SetupView: View {
         return !isDoubles || (!h2.isEmpty && !a2.isEmpty)
     }
 
-    private var homeLabel: String {
-        if h1.isEmpty { return "Home" }
-        return isDoubles && !h2.isEmpty ? "\(h1) / \(h2)" : h1
-    }
-    private var awayLabel: String {
-        if a1.isEmpty { return "Away" }
-        return isDoubles && !a2.isEmpty ? "\(a1) / \(a2)" : a1
-    }
+    private var homeLabel: String { LineupFields.teamName(h1, h2, isDoubles: isDoubles, fallback: "Home") }
+    private var awayLabel: String { LineupFields.teamName(a1, a2, isDoubles: isDoubles, fallback: "Away") }
 
     private var finalFormat: MatchFormat {
         if preset == .custom {
@@ -125,10 +127,13 @@ struct SetupView: View {
                     header
                     Divider().background(Color.bcBorder).padding(.bottom, BCLayout.stepSpacing)
 
-                    stepBlock(number: "01", label: "Match Type") { typeStep }
-                    stepBlock(number: "02", label: "Lineup")     { lineupStep }
-                    stepBlock(number: "03", label: "Initial Serve") { serveStep }
-                    stepBlock(number: "04", label: "Match Format") { formatStep }
+                    FormStep(number: "01", label: "Match Type") { typeStep }
+                    FormStep(number: "02", label: "Lineup") {
+                        LineupFields(isDoubles: isDoubles, home1: $homePlayer1, home2: $homePlayer2,
+                                     away1: $awayPlayer1, away2: $awayPlayer2)
+                    }
+                    FormStep(number: "03", label: "Initial Serve") { serveStep }
+                    FormStep(number: "04", label: "Match Format") { formatStep }
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) { summaryBar }
@@ -159,22 +164,6 @@ struct SetupView: View {
         .padding(.vertical, 20)
     }
 
-    // MARK: - Step wrapper
-
-    private func stepBlock<Content: View>(
-        number: String, label: String, @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: BCLayout.intraStepSpacing) {
-            HStack(spacing: 8) {
-                Text(number).stepLabelStyle()
-                Text(label).stepLabelStyle()
-            }
-            content()
-        }
-        .padding(.horizontal, BCLayout.horizontalMargin)
-        .padding(.bottom, BCLayout.stepSpacing)
-    }
-
     // MARK: - Step 1: Match Type
 
     private var typeStep: some View {
@@ -203,49 +192,6 @@ struct SetupView: View {
         } else {
             Capsule().fill(Color.bcCardActive).matchedGeometryEffect(id: "segment", in: segmentHighlight)
         }
-    }
-
-    // MARK: - Step 2: Lineup
-
-    private var lineupStep: some View {
-        VStack(spacing: 12) {
-            playerCard(side: .home)
-            Text("vs").cardLabelStyle()
-                .padding(.horizontal, 10).padding(.vertical, 4)
-                .overlay(Capsule().stroke(Color.bcBorder, lineWidth: 1))
-            playerCard(side: .away)
-        }
-    }
-
-    @ViewBuilder
-    private func playerCard(side: Side) -> some View {
-        let isHome = side == .home
-
-        VStack(alignment: .leading, spacing: 10) {
-            Text(isHome ? "Home" : "Away").cardLabelStyle()
-
-            nameField(placeholder: isHome ? "Player 1" : (isDoubles ? "Player 3" : "Player 2"),
-                      text: isHome ? $homePlayer1 : $awayPlayer1)
-
-            if isDoubles {
-                nameField(placeholder: isHome ? "Player 2" : "Player 4",
-                          text: isHome ? $homePlayer2 : $awayPlayer2)
-                    .transition(.bcReveal(reduceMotion: reduceMotion))
-            }
-        }
-        .padding(BCLayout.intraStepSpacing)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.bcCard)
-        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
-        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
-    }
-
-    private func nameField(placeholder: String, text: Binding<String>) -> some View {
-        TextField(placeholder, text: text)
-            .font(.system(size: 22, weight: .semibold))
-            .foregroundStyle(Color.bcText)
-            .autocorrectionDisabled()
-            .textInputAutocapitalization(.words)
     }
 
     // MARK: - Step 3: Serve
@@ -326,7 +272,7 @@ struct SetupView: View {
             let cols = [GridItem(.flexible()), GridItem(.flexible())]
             LazyVGrid(columns: cols, spacing: 12) {
                 ForEach(FormatPreset.allCases) { p in
-                    formatCard(p)
+                    Button { preset = p } label: { FormatCard(preset: p, selected: preset == p) }
                 }
             }
 
@@ -335,12 +281,10 @@ struct SetupView: View {
                     .transition(.bcReveal(reduceMotion: reduceMotion))
             }
 
-            ruleToggle("No-Ad Scoring", subtitle: "Sudden death at deuce — no advantage needed",
-                       isOn: $noAdScoring)
+            RuleToggle.noAdScoring(isOn: $noAdScoring)
 
             if finalFormat.bestOf > 1 {
-                ruleToggle("Deciding set tiebreak", subtitle: "Super tiebreak instead of final set",
-                           isOn: $decidingSetTiebreak)
+                RuleToggle.decidingSetTiebreak(isOn: $decidingSetTiebreak)
                     .transition(.opacity)
             }
         }
@@ -348,105 +292,20 @@ struct SetupView: View {
         .animation(.bcSmooth, value: finalFormat.bestOf)
     }
 
-    /// A rule switch in the Match Format step. Both rule toggles use this row so they stay identical.
-    private func ruleToggle(_ title: String, subtitle: String, isOn: Binding<Bool>) -> some View {
-        Toggle(isOn: isOn) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).optionTitleStyle()
-                Text(subtitle).optionSubtitleStyle()
-            }
-        }
-        .padding(BCLayout.intraStepSpacing)
-        .background(Color.bcCard)
-        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
-        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
-    }
-
-    @ViewBuilder
-    private func formatCard(_ p: FormatPreset) -> some View {
-        let selected = preset == p
-        Button { preset = p } label: {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(p.rawValue).optionTitleStyle()
-                Text(p.subtitle).optionSubtitleStyle()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BCLayout.intraStepSpacing)
-            .background(selected ? Color.bcCardActive : Color.bcCard)
-            .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
-            .overlay(
-                RoundedRectangle(cornerRadius: BCRadius.card)
-                    .stroke(selected ? Color.bcAccent : Color.bcBorder, lineWidth: selected ? 1.5 : 1)
-            )
-        }
-    }
-
     private var customPanel: some View {
         VStack(spacing: 0) {
             VStack(spacing: BCLayout.intraStepSpacing) {
-                stepperRow(
-                    label: "Games Per Set",
-                    subtitle: "Standard is 6",
-                    value: $customGames,
-                    range: 1...20
-                )
+                StepperRow(label: "Games Per Set", subtitle: "Standard is 6",
+                           value: $customGames, range: 1...20)
                 Divider().background(Color.bcBorder)
-                stepperRow(
-                    label: "Tiebreak At",
-                    subtitle: "\(customTiebreak)–\(customTiebreak)",
-                    value: $customTiebreak,
-                    range: 1...customGames
-                )
+                StepperRow(label: "Tiebreak At", subtitle: "\(customTiebreak)–\(customTiebreak)",
+                           value: $customTiebreak, range: 1...customGames)
             }
             .padding(BCLayout.intraStepSpacing)
         }
-        .background(Color.bcCard)
-        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
-        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
+        .cardSurface()
         .onChange(of: customGames) { _, new in
             customTiebreak = min(customTiebreak, new)
-        }
-    }
-
-    @ViewBuilder
-    private func stepperRow(
-        label: String, subtitle: String, value: Binding<Int>, range: ClosedRange<Int>
-    ) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label).optionTitleStyle()
-                Text(subtitle).optionSubtitleStyle()
-            }
-            Spacer()
-            HStack(spacing: 0) {
-                // Decrement
-                Button {
-                    if value.wrappedValue > range.lowerBound { value.wrappedValue -= 1 }
-                } label: {
-                    Text("–").font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.bcText)
-                        .frame(width: 36, height: 36)
-                        .background(Color.bcStepper)
-                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.control))
-                }
-
-                Text("\(value.wrappedValue)")
-                    .font(.bcMono(17, .medium))
-                    .foregroundStyle(Color.bcText)
-                    .frame(width: 40)
-                    .multilineTextAlignment(.center)
-
-                // Increment
-                Button {
-                    if value.wrappedValue < range.upperBound { value.wrappedValue += 1 }
-                } label: {
-                    Text("+").font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.bcOnAccent)
-                        .frame(width: 36, height: 36)
-                        .background(Color.bcAccent)
-                        .clipShape(RoundedRectangle(cornerRadius: BCRadius.control))
-                }
-            }
         }
     }
 

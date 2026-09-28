@@ -6,12 +6,16 @@ struct HistoryView: View {
     var transitions: Namespace.ID
     var onResumeMatch: (LiveMatchController) -> Void
 
-    @Query(sort: \MatchRecord.startDate, order: .reverse) private var records: [MatchRecord]
+    // Animated, so deleting a row (or the last one, into the empty state) slides rather than snaps.
+    @Query(sort: \MatchRecord.startDate, order: .reverse, animation: .bcSmooth) private var records: [MatchRecord]
     @State private var showingSetup = false
     @State private var showingSettings = false
     @State private var setupSource = "plus"   // the button Setup grows out of
     @State private var resumeCandidate: MatchRecord? = nil
     @State private var checkedForResume = false
+    @State private var recordToEdit: MatchRecord? = nil
+    @State private var recordToDelete: MatchRecord? = nil
+    @State private var showDeleteConfirmation = false
     @Environment(\.modelContext) private var context
 
     var body: some View {
@@ -26,8 +30,24 @@ struct HistoryView: View {
                         matchRow(record)
                             .listRowBackground(Color.bcCard)
                             .listRowSeparatorTint(Color.bcBorder)
+                            // A match is a permanent record: every delete asks first, so no full swipe.
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                // The app-wide gold tint would paint Delete like Edit, so it takes the system red back.
+                                Button(role: .destructive) { confirmDelete(record) } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                .tint(.red)
+                                Button { recordToEdit = record } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(Color.bcAccent)
+                            }
+                            .contextMenu {
+                                Button("Edit Match", systemImage: "pencil") { recordToEdit = record }
+                                Button("Delete Match", systemImage: "trash", role: .destructive) { confirmDelete(record) }
+                                    .tint(.red)
+                            }
                     }
-                    .onDelete(perform: deleteRecords)
                 }
                 .scrollContentBackground(.hidden)
                 .listStyle(.insetGrouped)
@@ -81,6 +101,22 @@ struct HistoryView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsView()
                 .navigationTransition(.zoom(sourceID: "settings", in: transitions))
+        }
+        .sheet(item: $recordToEdit) { record in
+            if let match = record.decoded {
+                EditMatchView(record: record, match: match)
+            } else {
+                Text("Could not load match.").foregroundStyle(Color.bcMuted)
+            }
+        }
+        // Shared by the swipe action and the context menu. It never reads the record, which is
+        // gone by the time the dialog finishes animating away.
+        .confirmationDialog("Delete this match?", isPresented: $showDeleteConfirmation,
+                            titleVisibility: .visible) {
+            Button("Delete Match", role: .destructive, action: deleteConfirmed)
+            Button("Cancel", role: .cancel) { recordToDelete = nil }
+        } message: {
+            Text("This can't be undone.")
         }
         .alert("Resume Match?", isPresented: .constant(resumeCandidate != nil)) {
             Button("Resume") {
@@ -193,8 +229,23 @@ struct HistoryView: View {
 
     // MARK: - Delete
 
-    private func deleteRecords(at offsets: IndexSet) {
-        for i in offsets { context.delete(records[i]) }
+    private func confirmDelete(_ record: MatchRecord) {
+        recordToDelete = record
+        showDeleteConfirmation = true
+    }
+
+    /// Deletes by object, not list position, so a list refreshing underneath can't shift it onto
+    /// another match. The success haptic waits for the save: it means the match is really gone.
+    private func deleteConfirmed() {
+        guard let record = recordToDelete else { return }
+        recordToDelete = nil
+        context.delete(record)
+        do {
+            try context.save()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch {
+            context.rollback()   // the row comes back rather than vanishing unsaved
+        }
     }
 
     // MARK: - Resume check

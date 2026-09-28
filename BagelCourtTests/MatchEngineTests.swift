@@ -362,6 +362,48 @@ struct MatchEngineTests {
         #expect(!after.isOver)
         #expect(before == after)
     }
+
+    // MARK: 8. Correcting a finished match from History
+
+    @Test("Correcting names and date keeps the points")
+    func correctedDetails() {
+        var m = makeMatch()
+        m.winGames(6, for: .home)
+        let date = Date(timeIntervalSince1970: 0)
+        let edited = m.withDetails(homePlayer: "Alexandra", homePlayer2: nil,
+                                   awayPlayer: "Maria", awayPlayer2: nil, startDate: date)
+        #expect(edited.homeDisplayName == "Alexandra" && edited.startDate == date && edited.id == m.id)
+        #expect(edited.points == m.points)
+    }
+
+    @Test("A corrected final score replays to exactly those sets")
+    func correctedFinalScore() throws {
+        let sets = [SetResult(home: 6, away: 4), SetResult(home: 3, away: 6), SetResult(home: 7, away: 6)]
+        let m = try #require(makeMatch().withFinalScore(sets))
+        #expect(m.isOver && m.winner == .home)
+        #expect(m.allSets == sets)
+    }
+
+    @Test("A corrected match tiebreak is scored in points")
+    func correctedMatchTiebreak() throws {
+        let format = MatchFormat(bestOf: 3, gamesPerSet: 6, tiebreakAt: 6, decidingSetTiebreak: true)
+        let sets = [SetResult(home: 6, away: 4), SetResult(home: 4, away: 6), SetResult(home: 10, away: 12)]
+        let m = try #require(makeMatch(format: format).withFinalScore(sets))
+        #expect(m.winner == .away)
+        #expect(m.allSets.last == SetResult(home: 10, away: 12, isSuperTiebreak: true))
+    }
+
+    @Test("Scores that can't finish a match are rejected", arguments: [
+        [[6, 5]],           // no winner yet in a set to 6
+        [[6, 6]],           // a tie
+        [[8, 6]],           // 6–6 goes to a tiebreak, so a set can't reach 8–6
+        [[6, 4], [6, 4]],   // a second set after a best of 1 was won
+    ])
+    func impossibleFinalScore(sets: [[Int]]) {
+        let scores = sets.map { SetResult(home: $0[0], away: $0[1]) }
+        #expect(makeMatch(format: .bestOf1).withFinalScore(scores) == nil)
+        #expect(makeMatch().withFinalScore([SetResult(home: 6, away: 4)]) == nil)   // best of 3 not finished
+    }
 }
 
 // MARK: - Match convenience for tests

@@ -99,6 +99,48 @@ public struct Match: Sendable, Codable {
         points.removeLast()
     }
 
+    // MARK: - Corrections (editing a match from history)
+
+    /// The same match with corrected names and start date; the points are untouched.
+    public func withDetails(homePlayer: String, homePlayer2: String?,
+                            awayPlayer: String, awayPlayer2: String?, startDate: Date) -> Match {
+        var copy = Match(type: type, homePlayer: homePlayer, homePlayer2: homePlayer2,
+                         awayPlayer: awayPlayer, awayPlayer2: awayPlayer2, format: format,
+                         initialServer: initialServer, id: id, startDate: startDate)
+        copy.points = points
+        return copy
+    }
+
+    /// The same match with its point log rebuilt to end with exactly `sets`: games per set, or
+    /// points for a match tiebreak. The rebuilt log is synthetic (love games, straight tiebreaks),
+    /// so only the set scores mean anything afterwards.
+    /// Returns nil when the scores can't finish a match under this format, e.g. a set with no
+    /// winner, 6–5 in a set to 6, or a set played after the match was already won.
+    public func withFinalScore(_ sets: [SetResult]) -> Match? {
+        var m = self
+        m.points = []
+        for set in sets {
+            let winner: Side = set.home > set.away ? .home : .away
+            let shared = min(set.home, set.away), lead = abs(set.home - set.away)
+            // Alternating keeps the lead at one until the winner pulls away, so nothing ends early.
+            if m.isSuperTiebreak {
+                for _ in 0..<shared { m.score(point: .home); m.score(point: .away) }
+                for _ in 0..<lead { m.score(point: winner) }
+            } else {
+                for _ in 0..<shared { m.winGame(for: .home); m.winGame(for: .away) }
+                for _ in 0..<lead { m.winGame(for: winner) }
+            }
+        }
+        // Replaying the rebuilt log is the validation: invalid scores come out different.
+        let scores = { (s: [SetResult]) in s.map { [$0.home, $0.away] } }
+        return m.isOver && scores(m.allSets) == scores(sets) ? m : nil
+    }
+
+    /// Wins the current game, or regular tiebreak, from 0–0 without dropping a point.
+    private mutating func winGame(for side: Side) {
+        for _ in 0..<(isInTiebreak ? 7 : 4) { score(point: side) }
+    }
+
     // MARK: - Watch snapshot
 
     public var scoreSnapshot: ScoreSnapshot {
