@@ -413,6 +413,16 @@ struct MatchEngineTests {
         #expect(makeMatch(format: .bestOf1).withFinalScore(scores) == nil)
         #expect(makeMatch().withFinalScore([SetResult(home: 6, away: 4)]) == nil)   // best of 3 not finished
     }
+
+    // MARK: 9. Format names (History, scorecard, share image)
+
+    @Test("Formats are named by preset, or by their sets and games")
+    func formatNames() {
+        #expect(MatchFormat.shortSet.displayLabel == "Short Set")
+        #expect(MatchFormat(bestOf: 3, gamesPerSet: 6).displayLabel == "Best of 3")
+        #expect(MatchFormat(bestOf: 3, gamesPerSet: 4).displayLabel == "Best of 3 · 4 Games")
+        #expect(MatchFormat(bestOf: 5, gamesPerSet: 6, noAdScoring: true).displayLabel == "Best of 5 · No-Ad")
+    }
 }
 
 // MARK: - Match convenience for tests

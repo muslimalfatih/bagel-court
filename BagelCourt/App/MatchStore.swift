@@ -56,9 +56,16 @@ final class MatchRecord {
 // MARK: - MatchFormat display label (App layer; not in engine)
 
 extension MatchFormat {
-    /// "Best of 3", "Pro Set" and so on, plus " · No-Ad" when that rule is on.
-    var displayLabel: String {
-        let name = FormatPreset(self).rawValue
-        return noAdScoring ? name + " · No-Ad" : name
+    /// A preset's name ("Short Set", "Pro Set") when the format is one; otherwise its sets, plus
+    /// games when they aren't the usual 6: "Best of 3", "Best of 5 · 4 Games".
+    var name: String {
+        let preset = FormatPreset.allCases.first {
+            $0 != .custom && ($0.baseFormat.bestOf, $0.baseFormat.gamesPerSet) == (bestOf, gamesPerSet)
+        }
+        if let preset { return preset.rawValue }
+        return gamesPerSet == 6 ? "Best of \(bestOf)" : "Best of \(bestOf) · \(gamesPerSet) Games"
     }
+
+    /// `name`, plus " · No-Ad" when that rule is on.
+    var displayLabel: String { noAdScoring ? name + " · No-Ad" : name }
 }

@@ -175,7 +175,8 @@ struct EditMatchView: View {
 
     private var formatStep: some View {
         VStack(alignment: .leading, spacing: 12) {
-            FormatCard(preset: FormatPreset(format))
+            FormatCard(title: format.name,
+                       subtitle: "\(format.gamesPerSet) games a set · Tiebreak triggers at \(format.tiebreakThreshold)-\(format.tiebreakThreshold)")
             RuleToggle.noAdScoring(isOn: .constant(format.noAdScoring))
             if format.bestOf > 1 {
                 RuleToggle.decidingSetTiebreak(isOn: .constant(format.decidingSetTiebreak))

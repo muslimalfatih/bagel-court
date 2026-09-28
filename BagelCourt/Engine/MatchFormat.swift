@@ -57,6 +57,6 @@ public struct MatchFormat: Sendable, Codable, Hashable, Equatable {
     public static let proSet   = MatchFormat(bestOf: 1, gamesPerSet: 8)
     /// Short set: single set of 4 games, tiebreak at 4-4.
     public static let shortSet = MatchFormat(bestOf: 1, gamesPerSet: 4)
-    /// Starting values for the custom preset.
-    public static let custom   = MatchFormat(bestOf: 1, gamesPerSet: 6)
+    /// Starting values for the custom preset: a standard best of 3.
+    public static let custom   = bestOf3
 }

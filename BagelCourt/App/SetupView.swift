@@ -4,17 +4,15 @@ import SwiftData
 // MARK: - Format preset (UI-only concept; wraps MatchFormat)
 
 enum FormatPreset: String, CaseIterable, Identifiable {
-    case bestOf3   = "Best of 3"
+    case shortSet  = "Short Set"
     case bestOf1   = "Best of 1"
     case proSet    = "Pro Set"
-    case shortSet  = "Short Set"
     case custom    = "Custom"
 
     var id: String { rawValue }
 
     var subtitle: String {
         switch self {
-        case .bestOf3:   return "Standard Tour"
         case .bestOf1:   return "Single Set"
         case .proSet:    return "8 Games"
         case .shortSet:  return "4 Games"
@@ -25,7 +23,6 @@ enum FormatPreset: String, CaseIterable, Identifiable {
     /// Shown under the format grid for the selected preset.
     var explanation: String {
         switch self {
-        case .bestOf3:   return "Win 2 out of 3 sets. Most common format for club and tournament play."
         case .bestOf1:   return "Just one set decides the match. Fast and simple."
         case .proSet:    return "First to 8 games wins, instead of the usual 6. One set only."
         case .shortSet:  return "First to 4 games wins. Good for quick practice or warm-up matches."
@@ -35,19 +32,11 @@ enum FormatPreset: String, CaseIterable, Identifiable {
 
     var baseFormat: MatchFormat {
         switch self {
-        case .bestOf3:   return .bestOf3
         case .bestOf1:   return .bestOf1
         case .proSet:    return .proSet
         case .shortSet:  return .shortSet
         case .custom:    return .custom
         }
-    }
-
-    /// The preset a saved format was made from, by sets and games; anything else is Custom.
-    init(_ format: MatchFormat) {
-        self = Self.allCases.first {
-            ($0.baseFormat.bestOf, $0.baseFormat.gamesPerSet) == (format.bestOf, format.gamesPerSet)
-        } ?? .custom
     }
 }
 
@@ -57,7 +46,7 @@ struct SetupView: View {
     /// Called when the match started from here ends (Done or Abandon); the owner closes Setup.
     var onFinish: () -> Void
 
-    init(preset: FormatPreset = .bestOf3, noAdScoring: Bool = false, decidingSetTiebreak: Bool = false,
+    init(preset: FormatPreset = .shortSet, noAdScoring: Bool = false, decidingSetTiebreak: Bool = false,
          onFinish: @escaping () -> Void) {
         _preset = State(initialValue: preset)
         _noAdScoring = State(initialValue: noAdScoring)
@@ -84,6 +73,7 @@ struct SetupView: View {
     @State private var isFlipping = false
     // Step 4
     @State private var preset: FormatPreset
+    @State private var customSets  = MatchFormat.custom.bestOf
     @State private var customGames = MatchFormat.custom.gamesPerSet
     @State private var noAdScoring: Bool
     @State private var decidingSetTiebreak: Bool
@@ -103,21 +93,17 @@ struct SetupView: View {
     private var homeLabel: String { LineupFields.teamName(h1, h2, isDoubles: isDoubles, fallback: "Home") }
     private var awayLabel: String { LineupFields.teamName(a1, a2, isDoubles: isDoubles, fallback: "Away") }
 
+    /// The deciding-set tiebreak only takes effect with more than one set; MatchFormat drops it otherwise.
     private var finalFormat: MatchFormat {
-        if preset == .custom {
-            return MatchFormat(bestOf: 1, gamesPerSet: customGames, noAdScoring: noAdScoring)
-        }
-        var base = preset.baseFormat
-        base.noAdScoring = noAdScoring
-        guard decidingSetTiebreak && base.bestOf > 1 else { return base }
+        let base = preset == .custom ? MatchFormat(bestOf: customSets, gamesPerSet: customGames) : preset.baseFormat
         return MatchFormat(bestOf: base.bestOf, gamesPerSet: base.gamesPerSet,
-                           decidingSetTiebreak: true, noAdScoring: noAdScoring)
+                           decidingSetTiebreak: decidingSetTiebreak, noAdScoring: noAdScoring)
     }
 
     private var summaryText: String {
         let srv = firstServer == .home ? homeLabel.uppercased() : awayLabel.uppercased()
         let noAd = noAdScoring ? " • No-Ad" : ""   // only when on, to keep the bar short
-        return "\(matchType.rawValue) • \(preset.rawValue)\(noAd) • \(homeLabel.uppercased()) VS \(awayLabel.uppercased()) • \(srv) SERVES"
+        return "\(matchType.rawValue) • \(finalFormat.name)\(noAd) • \(homeLabel.uppercased()) VS \(awayLabel.uppercased()) • \(srv) SERVES"
     }
 
     /// Says what is still missing while Start Match is disabled.
@@ -279,7 +265,7 @@ struct SetupView: View {
             let cols = [GridItem(.flexible()), GridItem(.flexible())]
             LazyVGrid(columns: cols, spacing: 12) {
                 ForEach(FormatPreset.allCases) { p in
-                    Button { preset = p } label: { FormatCard(preset: p, selected: preset == p) }
+                    Button { preset = p } label: { FormatCard(title: p.rawValue, subtitle: p.subtitle, selected: preset == p) }
                 }
             }
 
@@ -306,13 +292,20 @@ struct SetupView: View {
         .animation(.bcSmooth, value: finalFormat.bestOf)
     }
 
-    /// The tiebreak isn't set here: it always comes at games-all, so it's shown, not asked for.
+    /// Sets and games cover the other shapes (best of 3 or 5, shorter or longer sets). The tiebreak
+    /// isn't set here: it always comes at games-all, so it's shown, not asked for.
     private var customPanel: some View {
-        let t = finalFormat.tiebreakThreshold
-        return StepperRow(label: "Games Per Set", subtitle: "Standard is 6 · Tiebreak triggers at \(t)-\(t)",
-                          value: $customGames, range: 1...20)
-            .padding(BCLayout.intraStepSpacing)
-            .cardSurface()
+        let f = finalFormat, t = f.tiebreakThreshold
+        return VStack(spacing: BCLayout.intraStepSpacing) {
+            StepperRow(label: "Best of",
+                       subtitle: "Standard is 3 · " + (f.bestOf == 1 ? "One set decides the match" : "Win \(f.setsToWin) sets to take the match"),
+                       value: $customSets, range: 1...5, step: 2)
+            Divider().background(Color.bcBorder)
+            StepperRow(label: "Games Per Set", subtitle: "Standard is 6 · Tiebreak triggers at \(t)-\(t)",
+                       value: $customGames, range: 1...20)
+        }
+        .padding(BCLayout.intraStepSpacing)
+        .cardSurface()
     }
 
     // MARK: - Bottom summary bar
@@ -358,15 +351,14 @@ struct SetupView: View {
 
 // MARK: - Previews (the format step is 04; scroll down in the canvas)
 
-#Preview("Best of 3, rules off") { SetupView.preview() }
-#Preview("Best of 3, rules on") { SetupView.preview(noAdScoring: true, decidingSetTiebreak: true) }
+#Preview("Short Set, rules off") { SetupView.preview() }
 #Preview("Best of 1") { SetupView.preview(.bestOf1) }
 #Preview("Pro Set") { SetupView.preview(.proSet) }
-#Preview("Short Set") { SetupView.preview(.shortSet) }
-#Preview("Custom, No-Ad on") { SetupView.preview(.custom, noAdScoring: true) }
+#Preview("Custom, rules off") { SetupView.preview(.custom) }
+#Preview("Custom, rules on") { SetupView.preview(.custom, noAdScoring: true, decidingSetTiebreak: true) }
 
 private extension SetupView {
-    static func preview(_ preset: FormatPreset = .bestOf3, noAdScoring: Bool = false,
+    static func preview(_ preset: FormatPreset = .shortSet, noAdScoring: Bool = false,
                         decidingSetTiebreak: Bool = false) -> some View {
         BCFonts.register()
         return SetupView(preset: preset, noAdScoring: noAdScoring, decidingSetTiebreak: decidingSetTiebreak) {}

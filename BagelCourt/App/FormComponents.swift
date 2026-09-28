@@ -76,12 +76,13 @@ struct LineupFields: View {
     }
 }
 
-/// A number with – and + buttons, e.g. games per set.
+/// A number with – and + buttons, e.g. games per set. `step` 2 keeps a count odd (best of 1, 3, 5).
 struct StepperRow: View {
     let label: String
     var subtitle: String? = nil
     @Binding var value: Int
     let range: ClosedRange<Int>
+    var step = 1
 
     var body: some View {
         HStack {
@@ -118,8 +119,8 @@ struct StepperRow: View {
         }
     }
 
-    private func decrement() { if value > range.lowerBound { value -= 1 } }
-    private func increment() { if value < range.upperBound { value += 1 } }
+    private func decrement() { if value - step >= range.lowerBound { value -= step } }
+    private func increment() { if value + step <= range.upperBound { value += step } }
 }
 
 /// A rule switch: title, a short capitalised summary and, optionally, a sentence explaining it.
@@ -154,15 +155,16 @@ struct RuleToggle: View {
     }
 }
 
-/// A format preset's name and summary, as in Setup's format grid.
+/// A format's name and summary, as in Setup's format grid.
 struct FormatCard: View {
-    let preset: FormatPreset
+    let title: String
+    let subtitle: String
     var selected = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(preset.rawValue).optionTitleStyle()
-            Text(preset.subtitle).optionSubtitleStyle()
+            Text(title).optionTitleStyle()
+            Text(subtitle).optionSubtitleStyle()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BCLayout.intraStepSpacing)
