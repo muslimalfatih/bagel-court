@@ -38,6 +38,12 @@ enum FormatPreset: String, CaseIterable, Identifiable {
 struct SetupView: View {
     /// Called when the match started from here ends (Done or Abandon); the owner closes Setup.
     var onFinish: () -> Void
+
+    init(noAdScoring: Bool = false, onFinish: @escaping () -> Void) {
+        _noAdScoring = State(initialValue: noAdScoring)
+        self.onFinish = onFinish
+    }
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -59,6 +65,7 @@ struct SetupView: View {
     @State private var preset: FormatPreset = .bestOf3
     @State private var customGames    = 4
     @State private var customTiebreak = 3
+    @State private var noAdScoring: Bool
     @State private var decidingSetTiebreak = false
 
     private var isDoubles: Bool { matchType != .singles }
@@ -86,18 +93,22 @@ struct SetupView: View {
         if preset == .custom {
             let fmt = MatchFormat(bestOf: 1, gamesPerSet: customGames,
                                   tiebreakAt: customTiebreak,
-                                  decidingSetTiebreak: false)
+                                  decidingSetTiebreak: false,
+                                  noAdScoring: noAdScoring)
             return fmt
         }
-        let base = preset.baseFormat
+        var base = preset.baseFormat
+        base.noAdScoring = noAdScoring
         guard decidingSetTiebreak && base.bestOf > 1 else { return base }
         return MatchFormat(bestOf: base.bestOf, gamesPerSet: base.gamesPerSet,
-                           tiebreakAt: base.tiebreakAt, decidingSetTiebreak: true)
+                           tiebreakAt: base.tiebreakAt, decidingSetTiebreak: true,
+                           noAdScoring: noAdScoring)
     }
 
     private var summaryText: String {
         let srv = firstServer == .home ? homeLabel.uppercased() : awayLabel.uppercased()
-        return "\(matchType.rawValue) • \(preset.rawValue) • \(homeLabel.uppercased()) VS \(awayLabel.uppercased()) • \(srv) SERVES"
+        let noAd = noAdScoring ? " • No-Ad" : ""   // only when on, to keep the bar short
+        return "\(matchType.rawValue) • \(preset.rawValue)\(noAd) • \(homeLabel.uppercased()) VS \(awayLabel.uppercased()) • \(srv) SERVES"
     }
 
     /// Says what is still missing while Start Match is disabled.
@@ -324,22 +335,31 @@ struct SetupView: View {
                     .transition(.bcReveal(reduceMotion: reduceMotion))
             }
 
+            ruleToggle("No-Ad Scoring", subtitle: "Sudden death at deuce — no advantage needed",
+                       isOn: $noAdScoring)
+
             if finalFormat.bestOf > 1 {
-                Toggle(isOn: $decidingSetTiebreak) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Deciding set tiebreak").optionTitleStyle()
-                        Text("Super tiebreak instead of final set").optionSubtitleStyle()
-                    }
-                }
-                .padding(BCLayout.intraStepSpacing)
-                .background(Color.bcCard)
-                .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
-                .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
-                .transition(.opacity)
+                ruleToggle("Deciding set tiebreak", subtitle: "Super tiebreak instead of final set",
+                           isOn: $decidingSetTiebreak)
+                    .transition(.opacity)
             }
         }
         .animation(.bcSmooth, value: preset)
         .animation(.bcSmooth, value: finalFormat.bestOf)
+    }
+
+    /// A rule switch in the Match Format step. Both rule toggles use this row so they stay identical.
+    private func ruleToggle(_ title: String, subtitle: String, isOn: Binding<Bool>) -> some View {
+        Toggle(isOn: isOn) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).optionTitleStyle()
+                Text(subtitle).optionSubtitleStyle()
+            }
+        }
+        .padding(BCLayout.intraStepSpacing)
+        .background(Color.bcCard)
+        .clipShape(RoundedRectangle(cornerRadius: BCRadius.card))
+        .overlay(RoundedRectangle(cornerRadius: BCRadius.card).stroke(Color.bcBorder, lineWidth: 1))
     }
 
     @ViewBuilder
@@ -437,10 +457,10 @@ struct SetupView: View {
             Divider().background(Color.bcBorder)
 
             VStack(spacing: 12) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    Text(canStart ? summaryText : missingNamesHint).summaryBarStyle(accent: false)
-                        .lineLimit(1)
-                }
+                // Wraps instead of scrolling sideways: with No-Ad on, even short names overflow one line.
+                Text(canStart ? summaryText : missingNamesHint).summaryBarStyle(accent: false)
+                    .lineLimit(3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 Button("Start Match", action: startMatch)
                     .buttonStyle(.bcPrimary)
@@ -469,6 +489,20 @@ struct SetupView: View {
         // Presented over Setup: one motion up, instead of Setup closing and the match opening after it.
         controller = LiveMatchController(match: match, modelContext: context)
     }
+}
+
+// MARK: - Previews (the rule toggles are in step 04; scroll down in the canvas)
+
+#Preview("No-ad scoring off") {
+    let _ = BCFonts.register()
+    SetupView {}
+        .modelContainer(for: MatchRecord.self, inMemory: true)
+}
+
+#Preview("No-ad scoring on") {
+    let _ = BCFonts.register()
+    SetupView(noAdScoring: true) {}
+        .modelContainer(for: MatchRecord.self, inMemory: true)
 }
 
 // MARK: - Segment style (local helper)

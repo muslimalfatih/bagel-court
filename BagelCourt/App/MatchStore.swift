@@ -47,11 +47,18 @@ final class MatchRecord {
 // MARK: - MatchFormat display label (App layer; not in engine)
 
 extension MatchFormat {
+    /// "Best of 3", "Pro Set" and so on, plus " · No-Ad" when that rule is on.
+    /// Named by sets, games and tiebreak only: comparing whole formats labelled a best of 3
+    /// with a deciding-set tiebreak (or any no-ad match) as "Custom".
     var displayLabel: String {
-        if self == .bestOf3  { return "Best of 3" }
-        if self == .bestOf1  { return "Best of 1" }
-        if self == .proSet   { return "Pro Set" }
-        if self == .shortSet { return "Short Set" }
-        return "Custom"
+        let name: String
+        switch (bestOf, gamesPerSet, tiebreakAt) {
+        case (3, 6, 6): name = "Best of 3"
+        case (1, 6, 6): name = "Best of 1"
+        case (1, 8, 8): name = "Pro Set"
+        case (1, 4, 4): name = "Short Set"
+        default:        name = "Custom"
+        }
+        return noAdScoring ? name + " · No-Ad" : name
     }
 }

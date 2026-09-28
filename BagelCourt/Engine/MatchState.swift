@@ -87,10 +87,16 @@ struct MatchState {
 
     // MARK: - Win-condition checks
 
+    /// A game goes to the first side with 4 points and enough of a lead:
+    /// - Standard (advantage) scoring needs a 2-point lead, so from deuce (3-3) the game
+    ///   passes through advantage before it can be won.
+    /// - No-ad scoring needs only a 1-point lead, so from deuce the next point wins the game
+    ///   and the advantage state never occurs.
     private mutating func checkGame() {
+        let lead = format.noAdScoring ? 1 : 2
         let h = homePoints, a = awayPoints
-        if h >= 4 && h - a >= 2 { gameWon(by: .home) }
-        else if a >= 4 && a - h >= 2 { gameWon(by: .away) }
+        if h >= 4 && h - a >= lead { gameWon(by: .home) }
+        else if a >= 4 && a - h >= lead { gameWon(by: .away) }
     }
 
     private mutating func checkTiebreak() {

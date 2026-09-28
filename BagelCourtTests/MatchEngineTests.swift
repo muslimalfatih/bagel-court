@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import BagelCourt
 
@@ -88,6 +89,51 @@ struct MatchEngineTests {
         #expect(m.currentGameScore == .regular(home: 0, away: 0))
         #expect(m.allSets.last?.away == 1)
         #expect(m.allSets.last?.home == 0)
+    }
+
+    // MARK: 2b. No-ad scoring
+
+    @Test("No-ad: 40–40 still shows, then the next point wins the game", arguments: Side.allCases)
+    func noAdDecidingPoint(winner: Side) {
+        var m = makeMatch(format: MatchFormat(bestOf: 3, gamesPerSet: 6, tiebreakAt: 6, noAdScoring: true))
+        m.home(3); m.away(3)
+        #expect(m.currentGameScore == .deuce)
+        #expect(m.currentGameScore.homeLabel(server: .home) == "40")
+        #expect(m.currentGameScore.awayLabel(server: .home) == "40")
+
+        m.score(point: winner)   // deciding point: game, never advantage
+        #expect(m.currentGameScore == .regular(home: 0, away: 0))
+        #expect(m.allSets.last?.home == (winner == .home ? 1 : 0))
+        #expect(m.allSets.last?.away == (winner == .away ? 1 : 0))
+    }
+
+    @Test("Standard scoring: the point after 40–40 is advantage, not game")
+    func adScoringDeuceGivesAdvantage() {
+        var m = makeMatch()   // no-ad is off by default
+        m.home(3); m.away(3)
+        m.home()
+        #expect(m.currentGameScore == .advantage(.home))
+        #expect(m.allSets.last?.home == 0)
+    }
+
+    @Test("No-ad leaves tiebreaks win-by-two")
+    func noAdTiebreakStillWinByTwo() {
+        var m = makeMatch(format: MatchFormat(bestOf: 3, gamesPerSet: 6, tiebreakAt: 6, noAdScoring: true))
+        for _ in 0..<6 { m.winGame(for: .home); m.winGame(for: .away) }   // 6–6 → tiebreak
+
+        m.interleaved(home: 6, away: 6)
+        m.home()   // 7–6: one ahead is not enough
+        #expect(m.currentGameScore == .tiebreak(home: 7, away: 6))
+        m.home()   // 8–6
+        #expect(!m.isInTiebreak)
+        #expect(m.allSets.first?.home == 7 && m.allSets.first?.away == 6)
+    }
+
+    @Test("Matches saved before no-ad existed load with standard scoring")
+    func formatDecodesWithoutNoAdKey() throws {
+        let saved = #"{"bestOf":3,"gamesPerSet":6,"tiebreakAt":6,"decidingSetTiebreak":false}"#
+        let format = try JSONDecoder().decode(MatchFormat.self, from: Data(saved.utf8))
+        #expect(format == .bestOf3)   // noAdScoring defaults to false
     }
 
     // MARK: 3a. 6–4 set

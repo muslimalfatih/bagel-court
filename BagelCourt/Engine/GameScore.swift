@@ -2,7 +2,8 @@
 public enum GameScore: Sendable, Codable, Equatable {
     /// Regular game points: 0, 15, 30, or 40 for each side.
     case regular(home: Int, away: Int)
-    /// Both sides have reached 40; next point gives advantage.
+    /// Both sides have reached 40. With standard scoring the next point gives advantage;
+    /// with no-ad scoring it wins the game.
     case deuce
     /// One side holds the advantage point.
     case advantage(Side)
