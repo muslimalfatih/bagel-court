@@ -82,7 +82,9 @@ struct InMatchView: View {
             .disabled(!controller.canUndo)
         }
         .padding(.horizontal, BCLayout.horizontalMargin)
-        .padding(.top, 56)
+        // The safe area already clears the status bar and Dynamic Island (or notch); 56 pt on top of
+        // it left an empty band above the bar.
+        .padding(.top, 8)
         .padding(.bottom, 16)
     }
 

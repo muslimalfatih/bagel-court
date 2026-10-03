@@ -18,6 +18,7 @@ struct EditMatchView: View {
     @State private var away2: String
     @State private var startDate: Date
     @State private var sets: [SetScore]
+    @FocusState private var focusedField: LineupFields.Field?
 
     /// One set's score while editing. Sets are only added and removed at the end, so the set
     /// number is a stable id: removing a set never leaves a card bound to a missing index.
@@ -75,7 +76,7 @@ struct EditMatchView: View {
                     VStack(spacing: 0) {
                         FormStep(number: "01", label: "Lineup") {
                             LineupFields(isDoubles: isDoubles, home1: $home1, home2: $home2,
-                                         away1: $away1, away2: $away2)
+                                         away1: $away1, away2: $away2, focus: $focusedField)
                         }
                         FormStep(number: "02", label: "Date") { dateCard }
                         if match.isOver {
@@ -84,8 +85,11 @@ struct EditMatchView: View {
                         FormStep(number: match.isOver ? "04" : "03", label: "Match Format") { formatStep }
                     }
                     .padding(.top, 24)
+                    // Same keyboard behaviour as Setup: tapping outside a field or scrolling closes it.
+                    .contentShape(Rectangle())
+                    .onTapGesture { focusedField = nil }
                 }
-                .scrollDismissesKeyboard(.interactively)
+                .scrollDismissesKeyboard(.immediately)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

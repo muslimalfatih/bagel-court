@@ -77,6 +77,7 @@ struct SetupView: View {
     @State private var customGames = MatchFormat.custom.gamesPerSet
     @State private var noAdScoring: Bool
     @State private var decidingSetTiebreak: Bool
+    @FocusState private var focusedField: LineupFields.Field?
 
     private var isDoubles: Bool { matchType != .singles }
 
@@ -123,12 +124,17 @@ struct SetupView: View {
                     FormStep(number: "01", label: "Match Type") { typeStep }
                     FormStep(number: "02", label: "Lineup") {
                         LineupFields(isDoubles: isDoubles, home1: $homePlayer1, home2: $homePlayer2,
-                                     away1: $awayPlayer1, away2: $awayPlayer2)
+                                     away1: $awayPlayer1, away2: $awayPlayer2, focus: $focusedField)
                     }
                     FormStep(number: "03", label: "Initial Serve") { serveStep }
                     FormStep(number: "04", label: "Match Format") { formatStep }
                 }
+                // The keyboard is only for the names: tapping outside a field or scrolling closes it.
+                // Buttons, toggles and fields keep their own taps.
+                .contentShape(Rectangle())
+                .onTapGesture { focusedField = nil }
             }
+            .scrollDismissesKeyboard(.immediately)
             .safeAreaInset(edge: .bottom, spacing: 0) { summaryBar }
         }
         .preferredColorScheme(.dark)

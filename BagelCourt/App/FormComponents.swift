@@ -21,14 +21,22 @@ struct FormStep<Content: View>: View {
     }
 }
 
-/// Home and away name cards, with a second name per side for doubles.
+/// Home and away name cards, with a second name per side for doubles. Return moves to the next
+/// name; on the last one it reads Done and closes the keyboard.
 struct LineupFields: View {
+    enum Field: Hashable { case home1, home2, away1, away2 }
+
     let isDoubles: Bool
     @Binding var home1: String
     @Binding var home2: String
     @Binding var away1: String
     @Binding var away2: String
+    /// Owned by the form, so it can close the keyboard when you scroll or tap outside a field.
+    var focus: FocusState<Field?>.Binding
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// The order Return walks through the names.
+    private var order: [Field] { isDoubles ? [.home1, .home2, .away1, .away2] : [.home1, .away1] }
 
     /// "Dee / Vee" for a doubles pair, the one name in singles, `fallback` until a name is typed.
     static func teamName(_ first: String, _ second: String, isDoubles: Bool, fallback: String) -> String {
@@ -53,11 +61,13 @@ struct LineupFields: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(isHome ? "Home" : "Away").cardLabelStyle()
 
-            nameField(placeholder: isHome ? "Player 1" : (isDoubles ? "Player 3" : "Player 2"),
+            nameField(isHome ? .home1 : .away1,
+                      placeholder: isHome ? "Player 1" : (isDoubles ? "Player 3" : "Player 2"),
                       text: isHome ? $home1 : $away1)
 
             if isDoubles {
-                nameField(placeholder: isHome ? "Player 2" : "Player 4",
+                nameField(isHome ? .home2 : .away2,
+                          placeholder: isHome ? "Player 2" : "Player 4",
                           text: isHome ? $home2 : $away2)
                     .transition(.bcReveal(reduceMotion: reduceMotion))
             }
@@ -67,12 +77,16 @@ struct LineupFields: View {
         .cardSurface()
     }
 
-    private func nameField(placeholder: String, text: Binding<String>) -> some View {
-        TextField(placeholder, text: text)
+    private func nameField(_ field: Field, placeholder: String, text: Binding<String>) -> some View {
+        let next = order.drop(while: { $0 != field }).dropFirst().first
+        return TextField(placeholder, text: text)
             .font(.system(size: 22, weight: .semibold))
             .foregroundStyle(Color.bcText)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.words)
+            .focused(focus, equals: field)
+            .submitLabel(next == nil ? .done : .next)
+            .onSubmit { focus.wrappedValue = next }   // nil after the last name closes the keyboard
     }
 }
 
